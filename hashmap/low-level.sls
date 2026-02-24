@@ -13,6 +13,7 @@
 
           create-chain
           search-chain
+          add-to-chain!
           delete-from-chain!
           )
 

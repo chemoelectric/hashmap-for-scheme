@@ -7,7 +7,8 @@
   (export)
 
   (import (except (rnrs base (6)) for-each map)
-          (hashmap-include include))
+          (hashmap-include include)
+          (hashmap define-record-factory))
 
   )
 

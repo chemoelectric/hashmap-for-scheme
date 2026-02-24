@@ -53,10 +53,29 @@
        (find (lambda (pair) (matches? (car pair)))
              lst)))))
 
+(define-syntax add-to-chain!
+  ;;
+  ;; Either replaces an existing entry or inserts a new entry. Returns
+  ;; the size change: 0 or 1.
+  ;;
+  (syntax-rules ()
+    ((¶ chain matches? new-pair)
+     (let* ((lst (vector-ref chain 1))
+            (tl (find-tail (lambda (pair) (matches? (car pair)))
+                           lst)))
+       (if tl
+         (begin
+           (set-car! tl new-pair)
+           0)
+         (begin
+           (vector-set! chain 1 (cons new-pair lst))
+           1))))))
+
 (define-syntax delete-from-chain!
   ;;
   ;; This macro returns either the same chain vector or a bare
-  ;; key-value cons-pair.
+  ;; key-value cons-pair. A second return value is the size change:
+  ;; either 0 or -1.
   ;;
   (syntax-rules ()
     ((¶ chain matches?)
@@ -75,9 +94,9 @@
            (if (pair? (cdr lst))
              (begin
                (vector-set! chain 1 lst)
-               chain)
-             (car lst)))
-         chain)))))
+               (values chain -1))
+             (values (car lst) -1)))
+         (values chain 0))))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:
