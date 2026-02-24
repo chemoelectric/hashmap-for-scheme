@@ -1,0 +1,36 @@
+;; Copyright © 2026 Barry Schwartz
+;; SPDX-License-Identifier: MIT
+#!r6rs
+
+(library (hashmap low-level)
+
+  (export make-array-node
+          get-population-map
+          get-entry
+
+          population-map-bits-max
+          hash-bits-exhausted?
+
+          create-chain
+          search-chain
+          delete-from-chain!
+          )
+
+  (import (except (rnrs base (6)) for-each map)
+          (rnrs io simple (6)) ;; For debugging.
+          (rnrs control (6))
+          (rnrs syntax-case (6))
+          (rnrs mutable-pairs (6))
+          (srfi :1 lists)
+          (srfi :143 fixnums)
+          (hashmap hashmap-include))
+
+  (include "hashmap/low-level-implementation.scm")
+
+  )
+
+;;; local variables:
+;;; mode: scheme
+;;; geiser-scheme-implementation: chez
+;;; coding: utf-8
+;;; end:
