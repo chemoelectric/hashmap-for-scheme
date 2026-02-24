@@ -59,6 +59,11 @@
              (fxbit-field hashval j
                           (+ j (population-map-bits-max))))))))))
 
+(define (hashfunc->bitsfunc hf)
+  (lambda (key)
+    (let ((hashval (hf key)))
+      (make-hash-bits-source hashval))))
+
 ;;;-------------------------------------------------------------------
 ;;;
 ;;; The chains are association lists. However, they can be

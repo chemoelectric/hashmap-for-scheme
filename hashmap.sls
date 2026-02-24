@@ -7,7 +7,10 @@
   (export make-hashmap
           alist->hashmap
           hashmap?
-          hashmap-count)
+          hashmap-size
+          hashmap-empty?
+          hashmap-set!
+          hashmap-set-from-alist!)
 
   (import (hashmap hashmap-structure))
 

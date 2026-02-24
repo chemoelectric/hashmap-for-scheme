@@ -7,10 +7,14 @@
   (export make-hashmap
           alist->hashmap
           hashmap?
-          hashmap-count
-          set-hashmap-count!
+          hashmap-size
+          hashmap-equiv?
+          key->bits
           hashmap-trie
-          set-hashmap-trie!)
+
+          hashmap-empty?
+          hashmap-set!
+          hashmap-set-from-alist!)
 
   (import (except (rnrs base (6)) for-each map)
           (rnrs io simple (6)) ;; For debugging.
@@ -18,8 +22,10 @@
           (rnrs syntax-case (6))
           (rnrs mutable-pairs (6))
           (srfi :1 lists)
+          (srfi :42 eager-comprehensions)
           (srfi :143 fixnums)
           (hashmap hashmap-include)
+          (hashmap define-record-factory)
           (hashmap low-level))
 
   (include "hashmap/hashmap-structure-implementation.scm")

@@ -11,6 +11,7 @@
           population-map-bits-max
           hash-bits-exhausted?
           make-hash-bits-source
+          hashfunc->bitsfunc
 
           create-chain
           search-chain
