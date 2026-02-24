@@ -1,6 +1,5 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
-
 ;;;-------------------------------------------------------------------
 
 (define-syntax make-array-node
@@ -20,7 +19,8 @@
 
 (define-syntax population-map-bits-max
   ;;
-  ;; Each node array is no bigger than 32 entries.
+  ;; Tune this to some other value, if you wish to. The maximum size
+  ;; of a trie node is 2 raised to this power.
   ;;
   (syntax-rules ()
     ((¶) 5)))
@@ -33,6 +33,32 @@
   (syntax-rules ()
     ((¶ bits) (fxnegative? bits))))
 
+(define-syntax make-hash-bits-source
+  ;;
+  ;; The algorithm can use any number of hash bits. For instance, one
+  ;; could ensure that a hash were unique by including the key itself
+  ;; in the hash. Scheme, however, usually comes with hash functions
+  ;; that provide small integers as hash values. Let us assume such
+  ;; hash values, and assume a particular constant bound on the number
+  ;; of bits.
+  ;;
+  ;; We use the [fx-width - 1] least significant bits.
+  ;;
+  (syntax-rules ()
+    ((¶ hash-value)
+     (let* ((width-1 (- fx-width 1))
+            (mask
+             ;; The same value as fx-greatest, but, written this way,
+             ;; more obviously a bit-mask.
+             (bit-field-set 0 0 width-1))
+            (hashval (bitwise-and mask hash-value)))
+       (lambda (i)
+         (let ((j (* i (population-map-bits-max))))
+           (if (<= width-1 j)
+             -1 ;; Hash bits exhausted.
+             (fxbit-field hashval j
+                          (+ j (population-map-bits-max))))))))))
+
 ;;;-------------------------------------------------------------------
 ;;;
 ;;; The chains are association lists. However, they can be
@@ -42,11 +68,17 @@
 ;;;
 
 (define-syntax create-chain
+  ;;
+  ;; Create a new chain from two key-value cons-pairs.
+  ;;
   (syntax-rules ()
     ((¶ pair1 pair2)
      (vector #f (list pair1 pair2)))))
 
 (define-syntax search-chain
+  ;;
+  ;; Return either #f or the key-value cons-pair that matches.
+  ;;
   (syntax-rules ()
     ((¶ chain matches?)
      (let ((lst (vector-ref chain 1)))

@@ -10,6 +10,7 @@
 
           population-map-bits-max
           hash-bits-exhausted?
+          make-hash-bits-source
 
           create-chain
           search-chain
@@ -24,6 +25,8 @@
           (rnrs mutable-pairs (6))
           (srfi :1 lists)
           (srfi :143 fixnums)
+          (only (srfi :151 bitwise-operations)
+                bit-field-set bitwise-and)
           (hashmap hashmap-include))
 
   (include "hashmap/low-level-implementation.scm")

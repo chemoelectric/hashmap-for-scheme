@@ -6,14 +6,48 @@
 (import (except (rnrs base (6)) for-each map)
         (rnrs programs (6))
         (rnrs io simple (6))
+        (rnrs r5rs (6))
         (srfi :1 lists)
         (srfi :143 fixnums)
         (srfi :64 testing)
         (hashmap low-level))
 
+(define hash-bits-limit
+  (+ (quotient fx-width (population-map-bits-max))
+     (remainder fx-width (population-map-bits-max))
+     -1))
+
 (define-syntax number-matches?
   (syntax-rules ()
     ((¶ n) (lambda (x) (= x n)))))
+
+(test-begin "hashes")
+(let ((hbsrc (make-hash-bits-source #b10101)))
+  (test-equal #b10101 (hbsrc 0)))
+(let ((hbsrc (make-hash-bits-source
+              (fxarithmetic-shift
+               #b10101 (population-map-bits-max)))))
+  (test-equal #b10101 (hbsrc 1)))
+(let ((hbsrc (make-hash-bits-source
+              (fxarithmetic-shift
+               #b10101 (* 2 (population-map-bits-max))))))
+  (test-equal #b10101 (hbsrc 2)))
+(let ((hbsrc (make-hash-bits-source
+              (fxarithmetic-shift
+               #b10101 (* 4 (population-map-bits-max))))))
+  (test-equal #b10101 (hbsrc 4)))
+(let ((hbsrc (make-hash-bits-source
+              (fxarithmetic-shift
+               #b10101 (* (- hash-bits-limit 1)
+                          (population-map-bits-max))))))
+  (test-equal #b10101 (hbsrc (- hash-bits-limit 1))))
+(let ((hbsrc (make-hash-bits-source
+              (fxarithmetic-shift
+               #b10101 (* (- hash-bits-limit 1)
+                          (population-map-bits-max))))))
+  (test-eq #f (hash-bits-exhausted? (hbsrc (- hash-bits-limit 1))))
+  (test-eq #t (hash-bits-exhausted? (hbsrc hash-bits-limit))))
+(test-end "hashes")
 
 (test-begin "chains")
 (let ((chain (create-chain '(1 . 2) '(3 . 4))))
@@ -63,7 +97,7 @@
     (test-equal 1 n)
     (test-equal -1 b)
     (test-equal (create-chain '(5 . 6) '(1 . 2)) a)))
-(test-end)
+(test-end "chains")
 
 (let* ((test-result (test-runner-get))
        (failure-count (test-runner-fail-count test-result)))

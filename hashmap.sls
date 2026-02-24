@@ -4,11 +4,12 @@
 
 (library (hashmap)
 
-  (export)
+  (export make-hashmap
+          alist->hashmap
+          hashmap?
+          hashmap-count)
 
-  (import (except (rnrs base (6)) for-each map)
-          (hashmap-include include)
-          (hashmap define-record-factory))
+  (import (hashmap hashmap-structure))
 
   )
 
