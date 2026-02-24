@@ -17,6 +17,10 @@
 
 (test-begin "chains")
 (let ((chain (create-chain '(1 . 2) '(3 . 4))))
+  (test-equal #f (search-chain chain (number-matches? 0)))
+  (test-equal '(1 . 2) (search-chain chain (number-matches? 1)))
+  (test-equal '(3 . 4) (search-chain chain (number-matches? 3)))
+  (test-equal chain (delete-from-chain! chain (number-matches? 0)))
   (test-equal '(3 . 4) (delete-from-chain! chain (number-matches? 1))))
 (let ((chain (create-chain '(1 . 2) '(3 . 4))))
   (test-equal '(1 . 2) (delete-from-chain! chain (number-matches? 3))))

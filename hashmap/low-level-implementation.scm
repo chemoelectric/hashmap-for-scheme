@@ -63,7 +63,7 @@
      (let* ((lst (vector-ref chain 1))
             (tl (find-tail (lambda (pair) (matches? (car pair)))
                            lst)))
-       (when tl
+       (if tl
          (let* ((next (cdr tl))
                 (lst
                  (if (pair? next)
@@ -76,7 +76,8 @@
              (begin
                (vector-set! chain 1 lst)
                chain)
-             (car lst))))))))
+             (car lst)))
+         chain)))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:
