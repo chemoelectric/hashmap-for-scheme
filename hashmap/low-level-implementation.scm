@@ -17,13 +17,9 @@
 
 ;;;-------------------------------------------------------------------
 
-(define-syntax population-map-bits-max
-  ;;
-  ;; Tune this to some other value, if you wish to. The maximum size
-  ;; of a trie node is 2 raised to this power.
-  ;;
+(define-syntax hash-bits-chunk-max
   (syntax-rules ()
-    ((¶) 5)))
+    ((¶) (if (<= fx-width 32) 4 5))))
 
 (define-syntax hash-bits-exhausted?
   ;;
@@ -53,16 +49,18 @@
              (bit-field-set 0 0 width-1))
             (hashval (bitwise-and mask hash-value)))
        (lambda (i)
-         (let ((j (* i (population-map-bits-max))))
+         (let ((j (* i (hash-bits-chunk-max))))
            (if (<= width-1 j)
              -1 ;; Hash bits exhausted.
              (fxbit-field hashval j
-                          (+ j (population-map-bits-max))))))))))
+                          (+ j (hash-bits-chunk-max))))))))))
 
-(define (hashfunc->bitsfunc hf)
+(define (hashfunc->popmapfunc hf)
   (lambda (key)
-    (let ((hashval (hf key)))
-      (make-hash-bits-source hashval))))
+    (let* ((hashval (hf key))
+           (bits-source (make-hash-bits-source hashval)))
+      (lambda (i)
+        (fxarithmetic-shift-left 1 (bits-source i))))))
 
 ;;;-------------------------------------------------------------------
 ;;;

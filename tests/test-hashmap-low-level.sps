@@ -13,8 +13,8 @@
         (hashmap low-level))
 
 (define hash-bits-limit
-  (+ (quotient fx-width (population-map-bits-max))
-     (remainder fx-width (population-map-bits-max))
+  (+ (quotient fx-width (hash-bits-chunk-max))
+     (remainder fx-width (hash-bits-chunk-max))
      -1))
 
 (define-syntax number-matches?
@@ -26,25 +26,25 @@
   (test-equal #b10101 (hbsrc 0)))
 (let ((hbsrc (make-hash-bits-source
               (fxarithmetic-shift
-               #b10101 (population-map-bits-max)))))
+               #b10101 (hash-bits-chunk-max)))))
   (test-equal #b10101 (hbsrc 1)))
 (let ((hbsrc (make-hash-bits-source
               (fxarithmetic-shift
-               #b10101 (* 2 (population-map-bits-max))))))
+               #b10101 (* 2 (hash-bits-chunk-max))))))
   (test-equal #b10101 (hbsrc 2)))
 (let ((hbsrc (make-hash-bits-source
               (fxarithmetic-shift
-               #b10101 (* 4 (population-map-bits-max))))))
+               #b10101 (* 4 (hash-bits-chunk-max))))))
   (test-equal #b10101 (hbsrc 4)))
 (let ((hbsrc (make-hash-bits-source
               (fxarithmetic-shift
                #b10101 (* (- hash-bits-limit 1)
-                          (population-map-bits-max))))))
+                          (hash-bits-chunk-max))))))
   (test-assert (positive? (hbsrc (- hash-bits-limit 1)))))
 (let ((hbsrc (make-hash-bits-source
               (fxarithmetic-shift
                #b10101 (* (- hash-bits-limit 1)
-                          (population-map-bits-max))))))
+                          (hash-bits-chunk-max))))))
   (test-eq #f (hash-bits-exhausted? (hbsrc (- hash-bits-limit 1))))
   (test-eq #t (hash-bits-exhausted? (hbsrc hash-bits-limit))))
 (test-end "hashes")

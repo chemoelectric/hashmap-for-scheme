@@ -9,10 +9,11 @@
           hashmap?
           hashmap-size
           hashmap-equiv?
-          key->bits
+          key->depth->popmap
           hashmap-trie
 
           hashmap-empty?
+          hashmap-ref
           hashmap-set!
           hashmap-set-from-alist!)
 

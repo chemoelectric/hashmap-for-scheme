@@ -8,16 +8,16 @@
                 (lambda (construct)
                   (lambda (equiv? hashfunc . alst)
                     (let ((hm (construct
-                               0 equiv? (hashfunc->bitsfunc hashfunc)
-                               #f)))
+                               0 equiv?
+                               (hashfunc->popmapfunc hashfunc) #f)))
                       (hashmap-set-from-alist! hm alst)))))
 
   (constructor> alist->hashmap
                 (lambda (construct)
                   (lambda (equiv? hashfunc alst)
                     (let ((hm (construct
-                               0 equiv? (hashfunc->bitsfunc hashfunc)
-                               #f)))
+                               0 equiv?
+                               (hashfunc->popmapfunc hashfunc) #f)))
                       (hashmap-set-from-alist! hm alst)))))
 
   (predicate> hashmap?)
@@ -26,15 +26,41 @@
   (setter> 1 set-hashmap-size!)
 
   (getter> 2 hashmap-equiv?)
-  (getter> 3 key->bits)
+  (getter> 3 key->depth->popmap)
 
   (getter> 4 hashmap-trie)
   (setter> 4 set-hashmap-trie!))
 
 ;;;-------------------------------------------------------------------
 
+(define-syntax entry-index
+  ;;
+  ;; For an array node at a given depth, and a given depth->popmap
+  ;; procedure (which is the representation of a key), find the
+  ;; corresponding array entry.
+  ;;
+  (syntax-rules ()
+    ((¶ depth->popmap node depth)
+     (let* ((pm (depth->popmap depth))
+            (mask (fx- pm 1)))
+       (fxbit-count (fxand mask (get-population-map node)))))))
+
+;;;-------------------------------------------------------------------
+
 (define (hashmap-empty? hm)
   (zero? (hashmap-size hm)))
+
+(define (hashmap-ref hm key)
+  (if (hashmap-empty? hm)
+    #f
+    (let ((depth->popmap ((key->depth->popmap hm) key))
+          (tr (hashmap-trie hm)))
+      (let ((node tr))
+        (cond
+          ((pair? node)
+           (and ((hashmap-equiv? hm) key (car node))
+                node))
+          (else 'FIXME))))))
 
 (define hashmap-set!
   (case-lambda
@@ -48,10 +74,14 @@
     ((hm) hm)))
 
 (define (make-initial-trie! hm key value)
-  (let ((bits (((key->bits hm) key) 0)))
-    (set-hashmap-trie! hm (make-array-node bits `(,key . ,value)))
-    (set-hashmap-size! hm 1)
-    hm))
+  (set-hashmap-trie! hm `(,key . ,value))
+  (set-hashmap-size! hm 1)
+  hm)
+;;;   (let ((depth->popmap ((key->depth->popmap hm) key)))
+;;;     (set-hashmap-trie! hm (make-array-node (depth->popmap 0)
+;;;                                            `(,key . ,value)))
+;;;     (set-hashmap-size! hm 1)
+;;;     hm))
 
 (define (insert-entry! hm key value)
   'FIXME

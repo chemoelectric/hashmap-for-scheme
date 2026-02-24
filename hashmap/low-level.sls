@@ -8,10 +8,10 @@
           get-population-map
           get-entry
 
-          population-map-bits-max
+          hash-bits-chunk-max
           hash-bits-exhausted?
           make-hash-bits-source
-          hashfunc->bitsfunc
+          hashfunc->popmapfunc
 
           create-chain
           search-chain
