@@ -13,6 +13,7 @@
           make-hash-bits-source
           hashfunc->popmapfunc
 
+          chain?
           create-chain
           search-chain
           add-to-chain!

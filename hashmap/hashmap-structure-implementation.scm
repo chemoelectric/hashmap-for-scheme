@@ -2,14 +2,28 @@
 ;; SPDX-License-Identifier: MIT
 ;;;-------------------------------------------------------------------
 
+(define (plist->alist lst)
+  (let loop ((p lst)
+             (q '())
+             (r '())
+             (qr #f))
+    (if (null-list? p)
+      (begin
+        (when qr (error "expected pairs of elements" lst))
+        (map cons (reverse! q) (reverse! r)))
+      (if qr
+        (loop (cdr p) q (cons (car p) r) (not qr))
+        (loop (cdr p) (cons (car p) q) r (not qr))))))
+
 (define-record-factory <hashmap>
 
   (constructor> make-hashmap
                 (lambda (construct)
-                  (lambda (equiv? hashfunc . alst)
+                  (lambda (equiv? hashfunc . rest*)
                     (let ((hm (construct
                                0 equiv?
-                               (hashfunc->popmapfunc hashfunc) #f)))
+                               (hashfunc->popmapfunc hashfunc) #f))
+                          (alst (plist->alist rest*)))
                       (hashmap-set-from-alist! hm alst)))))
 
   (constructor> alist->hashmap
@@ -54,13 +68,26 @@
   (if (hashmap-empty? hm)
     #f
     (let ((depth->popmap ((key->depth->popmap hm) key))
-          (tr (hashmap-trie hm)))
-      (let ((node tr))
+          (depth -1))
+      (let ((node (hashmap-trie hm)))
         (cond
           ((pair? node)
-           (and ((hashmap-equiv? hm) key (car node))
-                node))
-          (else 'FIXME))))))
+           (let ((equiv? (hashmap-equiv? hm))
+                 (k (car node)))
+             (and (equiv? key k) node)))
+          ((chain? node)
+           (let* ((equiv? (hashmap-equiv? hm))
+                  (matches? (lambda (k) (equiv? key k))))
+             (search-chain node matches?)))
+          (else
+           (set! depth (fx+ depth 1))
+           (let ((pm (depth->popmap depth)))
+             (if (hash-bits-exhausted? pm)
+               #f
+               (let* ((mask (fx- pm 1))
+                      (i (fxbit-count
+                          (fxand mask (get-population-map node)))))
+                 'FIXME)))))))))
 
 (define hashmap-set!
   (case-lambda
@@ -88,11 +115,11 @@
   hm)
 
 (define (hashmap-set-from-alist! hm alst)
-  (do-ec (:list pair alst)
-         (:let key (car pair))
-         (:let value (cdr pair))
-         (hashmap-set! hm key value))
-  hm)
+  (let loop ((p alst)
+             (hm hm))
+    (if (null-list? p)
+      hm
+      (loop (cdr p) (hashmap-set! hm (caar p) (cdar p))))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:

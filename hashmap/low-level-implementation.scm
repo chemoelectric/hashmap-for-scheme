@@ -60,7 +60,10 @@
     (let* ((hashval (hf key))
            (bits-source (make-hash-bits-source hashval)))
       (lambda (i)
-        (fxarithmetic-shift-left 1 (bits-source i))))))
+        (let ((bits (bits-source i)))
+          (if (hash-bits-exhausted? bits)
+            bits
+            (fxarithmetic-shift-left 1 bits)))))))
 
 ;;;-------------------------------------------------------------------
 ;;;
@@ -69,6 +72,10 @@
 ;;; a vector that cannot be an array node: its entry 0 is #f rather
 ;;; than a fixnum. The association list is entry 1 of the vector.
 ;;;
+
+(define-syntax chain?
+  (syntax-rules ()
+    ((¶ vec) (eq? (vector-ref vec 0) #f))))
 
 (define-syntax create-chain
   ;;
