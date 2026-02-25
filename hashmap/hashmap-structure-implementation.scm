@@ -78,30 +78,29 @@
   (if (hashmap-empty? hm)
     #f
     (let ((depth->popmap ((key->depth->popmap hm) key)))
-      (let loop ((node (hashmap-trie hm))
-                 (depth -1))
-        (cond
-          ((pair? node)
-           (let ((equiv? (hashmap-equiv? hm))
-                 (k (car node)))
-             (and (equiv? key k) node)))
-          ((chain? node)
-           (let* ((equiv? (hashmap-equiv? hm))
-                  (matches? (lambda (k) (equiv? key k))))
-             (search-chain node matches?)))
-          (else
-           (let* ((next-depth (fx+ depth 1))
-                  (pm (depth->popmap next-depth)))
-             (if (hash-bits-exhausted? pm)
-               #f
-               (let* ((mask (fx- pm 1))
-                      (i (fxbit-count
-                          (fxand mask (get-population-map
-                                       node))))
-                      (entry (get-entry node i)))
-                 (if (not entry)
-                   #f
-                   (loop entry next-depth) ))))))))))
+      (let loop ((array (hashmap-trie hm))
+                 (depth 0)
+                 (pm (depth->popmap 0)))
+        (if (hash-bits-exhausted? pm)
+          #f
+          (let* ((mask (fx- pm 1))
+                 (i (fxbit-count
+                     (fxand mask (get-population-map array))))
+                 (entry (get-entry array i)))
+            (cond
+              ((not entry) #f)
+              ((pair? entry)
+               (let ((equiv? (hashmap-equiv? hm))
+                     (k (car entry)))
+                 (if (equiv? key k) entry #f)))
+              ((chain? entry)
+               (let* ((equiv? (hashmap-equiv? hm))
+                      (matches? (lambda (k) (equiv? key k))))
+                 (search-chain entry matches?)))
+              (else
+               (let ((next-depth (fx+ depth 1)))
+                 (loop entry next-depth
+                       (depth->popmap next-depth)))))))))))
 
 (define hashmap-set!
   (case-lambda
@@ -114,16 +113,42 @@
     ((hm) hm)))
 
 (define (make-initial-trie! hm key value)
-  (set-hashmap-trie! hm `(,key . ,value))
-  (set-hashmap-size! hm 1)
-  hm)
-;;;   (let ((depth->popmap ((key->depth->popmap hm) key)))
-;;;     (set-hashmap-trie! hm (make-array-node (depth->popmap 0)
-;;;                                            `(,key . ,value)))
-;;;     (set-hashmap-size! hm 1)
-;;;     hm))
+  (let* ((depth->popmap ((key->depth->popmap hm) key))
+         (pm (depth->popmap 0))
+         (leaf `(,key . ,value))
+         (array (make-array-node pm leaf)))
+    (set-hashmap-trie! hm array)
+    (set-hashmap-size! hm 1)
+    hm))
 
 (define (insert-entry! hm key value)
+  (let ((depth->popmap ((key->depth->popmap hm) key)))
+    (let loop ((array (hashmap-trie hm))
+               (depth 0)
+               (setter! (lambda (trie)
+                          (set-hashmap-trie! hm trie))))
+      (let* ((pm (depth->popmap depth))
+             (mask (fx- pm 1))
+             (i (fxbit-count
+                 (fxand mask (get-population-map array))))
+             (entry (get-entry array i)))
+        (define (expand-array)
+          (let* ((n (array-size array))
+                 (array1 (make-vector (fx+ n 2))))
+            (set-population-map!
+             array1 (fxior pm (get-population-map array)))
+            (do ((i 0 (fx+ i 1)))
+                ((fx=? i n))
+              (set-entry! array1 i (get-entry-fast array i)))
+            (set-entry! array1 n `(,key . ,value))
+            (setter! array1)
+            (set-hashmap-size! hm (+ 1 (hashmap-size hm)))
+            hm))
+        (cond
+          ((not entry) (expand-array))
+          (else 'FIXME))))))
+
+#;(define (insert-entry! hm key value)
   ;;
   ;;
   ;;

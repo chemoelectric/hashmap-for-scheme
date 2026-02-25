@@ -11,6 +11,14 @@
   (syntax-rules ()
     ((¶ node) (vector-ref node 0))))
 
+(define-syntax set-population-map!
+  (syntax-rules ()
+    ((¶ node value) (vector-set! node 0 value))))
+
+(define-syntax array-size
+  (syntax-rules ()
+    ((¶ node) (fx- (vector-length node) 1))))
+
 (define-syntax get-entry
   (syntax-rules ()
     ((¶ node i)
@@ -18,6 +26,14 @@
        (if (fx<=? (vector-length node) i+1)
          #f
          (vector-ref node i+1))))))
+
+(define-syntax get-entry-fast
+  (syntax-rules ()
+    ((¶ node i) (vector-ref node (fx+ i 1)))))
+
+(define-syntax set-entry!
+  (syntax-rules ()
+    ((¶ node i value) (vector-set! node (fx+ i 1) value))))
 
 ;;;-------------------------------------------------------------------
 

@@ -6,7 +6,11 @@
 
   (export make-array-node
           get-population-map
+          set-population-map!
+          array-size
           get-entry
+          get-entry-fast
+          set-entry!
 
           hash-bits-chunk-max
           hash-bits-exhausted?
