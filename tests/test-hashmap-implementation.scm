@@ -23,6 +23,29 @@
   (test-equal (length alst) (hashmap-size hm)))
 (test-end)
 
+(test-begin "tiny hash function")
+(let* ((tiny-hash (lambda (str) (remainder (string-hash str) 2)))
+       (make-tiny-hashmap
+        (lambda arg*
+          (apply make-hashmap (cons* string=? tiny-hash arg*))))
+       (alist->tiny-hashmap
+        (lambda (alst)
+          (alist->hashmap string=? tiny-hash alst)))
+       (alst (list-ec (:range i 1 10001)
+                      (:let s (number->string i 16))
+                      (:let pair `(,s . ,i))
+                      pair))
+       (hm (alist->tiny-hashmap alst)))
+  (test-assert (every?-ec (:list pair alst)
+                          (:let s (car pair))
+                          (:let i (cdr pair))
+                          (:let pair% (hashmap-ref hm s))
+                          (:let s% (car pair%))
+                          (:let i% (cdr pair%))
+                          (and (string=? s s%) (= i i%))))
+  (test-equal (length alst) (hashmap-size hm)))
+(test-end)
+
 ;;; local variables:
 ;;; mode: scheme
 ;;; geiser-scheme-implementation: chez
