@@ -37,10 +37,6 @@
 
 ;;;-------------------------------------------------------------------
 
-(define-syntax hash-bits-chunk-max
-  (syntax-rules ()
-    ((¶) (if (<= fx-width 32) 4 5))))
-
 (define-syntax hash-bits-exhausted?
   ;;
   ;; The size of the hash is not specified. When it is exhausted,
@@ -58,22 +54,14 @@
   ;; hash values, and assume a particular constant bound on the number
   ;; of bits.
   ;;
-  ;; We use the [fx-width - 1] least significant bits.
-  ;;
   (syntax-rules ()
     ((¶ hash-value)
-     (let* ((width-1 (- fx-width 1))
-            (mask
-             ;; The same value as fx-greatest, but, written this way,
-             ;; more obviously a bit-mask.
-             (bit-field-set 0 0 width-1))
-            (hashval (bitwise-and mask hash-value)))
-       (lambda (i)
-         (let ((j (* i (hash-bits-chunk-max))))
-           (if (<= width-1 j)
-             -1 ;; Hash bits exhausted.
-             (fxbit-field hashval j
-                          (+ j (hash-bits-chunk-max))))))))))
+     (lambda (i)
+       (let ((j (* (hash-bits-chunk-max) i)))
+         (if (fx<=? (hash-bits-max) j)
+           -1 ;; Hash bits exhausted.
+           (fxbit-field hash-value j
+                        (+ j (hash-bits-chunk-max)))))))))
 
 (define (hashfunc->popmapfunc hf)
   (lambda (key)

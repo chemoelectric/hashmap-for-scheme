@@ -21,7 +21,6 @@
                   (error r6rs-error))
           (rnrs io simple (6)) ;; For debugging.
           (rnrs control (6))
-          (rnrs syntax-case (6))
           (rnrs mutable-pairs (6))
           (srfi :1 lists)
           (srfi :143 fixnums)
