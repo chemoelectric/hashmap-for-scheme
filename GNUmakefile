@@ -70,3 +70,48 @@ check-sagittarius-r7rs:
 .PHONY: clean
 clean:
 	-rm -f *.log
+
+#---------------------------------------------------------------------
+
+# CHICKEN 6 egg. At the time of this writing, CHICKEN 6 is not yet
+# released. Thus I have my own copy of ‘chicken-install’ for version 6
+# under the name ‘chicken-install-6’.
+
+CHICKEN_INSTALL_6 = chicken-install-6
+
+chicken-6/hashmap.egg: GNUmakefile
+	awk 'BEGIN { \
+	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
+	  print " (version \"0.0.0\")"; \
+	  print " (category data)"; \
+	  print " (license \"MIT\")"; \
+	  print " (author \"Barry Schwartz\")"; \
+	  print " (dependencies srfi-1 srfi-143)"; \
+	  print " (components"; \
+	  print "  (extension hashmap.low-level"; \
+	  print "   (source \"hashmap/low-level.sld\"))"; \
+	  print "  (extension hashmap.define-record-factory"; \
+	  print "   (source \"hashmap/define-record-factory.sld\"))"; \
+	  print "  (extension hashmap.hashmap-structure"; \
+	  print "   (source \"hashmap/hashmap-structure.sld\")"; \
+	  print "   (component-dependencies hashmap.define-record-factory)"; \
+	  print "   (component-dependencies hashmap.low-level))"; \
+	  print "  (extension hashmap"; \
+	  print "   (source \"hashmap.sld\")"; \
+	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
+	}' > $(@)
+
+chicken-6/hashmap.so: chicken-6/hashmap.egg GNUmakefile
+	(cd chicken-6; $(CHICKEN_INSTALL_6) -n)
+
+.PHONY: clean
+clean:
+	-rm -f chicken-6/hashmap.build.sh
+	-rm -f chicken-6/hashmap.install.sh
+	-rm -f chicken-6/hashmap.egg
+	-rm -f chicken-6/hashmap*.so
+	-rm -f chicken-6/hashmap*.o
+	-rm -f chicken-6/hashmap*.link
+	-rm -f chicken-6/hashmap*.import.*
+
+#---------------------------------------------------------------------
