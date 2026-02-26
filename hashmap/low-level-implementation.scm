@@ -27,7 +27,7 @@
          #f
          (vector-ref node i+1))))))
 
-(define-syntax get-entry-fast
+(define-syntax get-entry-quickly
   (syntax-rules ()
     ((¶ node i) (vector-ref node (fx+ i 1)))))
 
