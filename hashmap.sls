@@ -9,6 +9,7 @@
           hashmap?
           hashmap-size
           hashmap-empty?
+          hashmap-ref
           hashmap-set!
           hashmap-set-from-alist!)
 
