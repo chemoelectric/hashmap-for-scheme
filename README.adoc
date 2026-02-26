@@ -2,14 +2,13 @@
 
 An implementation of hash array mapped tries for Scheme. This
 implementation may be used directly or as an underlying hashmap
-implementation for, say, SRFI-146.
+implementation for, say, SRFI-146.footnote:[I have long had an ATS2
+implementation of hash tries. Once translated from ATS2, this can be
+compiled with just a C compiler. It employs proofs and linear types
+for safety and requires only that stored objects be allocated to fixed
+locations, in the manner of a malloc. Garbage collection is not
+required. I may one day add this implementation as FFI for compatible
+Schemes.]
 
 The library is still under development. Insertion has been written,
 but deletion and tree walks have not.
-
-footnote:[I have long had an ATS2 implementation of hash tries. Once
-translated from ATS2, this can be compiled with just a C compiler. It
-employs proofs and linear types for safety and requires only that
-stored objects be allocated to fixed locations, in the manner of a
-malloc. Garbage collection is not required. I may one day add this
-implementation as FFI for compatible Schemes.]
