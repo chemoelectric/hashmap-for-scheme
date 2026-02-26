@@ -2,19 +2,6 @@
 ;; SPDX-License-Identifier: MIT
 ;;;-------------------------------------------------------------------
 
-(define (plist->alist lst)
-  (let loop ((p lst)
-             (q '())
-             (r '())
-             (qr #f))
-    (if (null-list? p)
-      (begin
-        (when qr (error "expected pairs of elements" lst))
-        (map cons (reverse! q) (reverse! r)))
-      (if qr
-        (loop (cdr p) q (cons (car p) r) (not qr))
-        (loop (cdr p) (cons (car p) q) r (not qr))))))
-
 (define-record-factory <hashmap>
 
   (constructor> make-hashmap
@@ -58,6 +45,19 @@
      (let* ((pm (depth->popmap depth))
             (mask (fx- pm 1)))
        (fxbit-count (fxand mask (get-population-map node)))))))
+
+(define (plist->alist lst)
+  (let loop ((p lst)
+             (q '())
+             (r '())
+             (qr #f))
+    (if (null-list? p)
+      (begin
+        (when qr (error "expected pairs of elements" lst))
+        (map cons (reverse! q) (reverse! r)))
+      (if qr
+        (loop (cdr p) q (cons (car p) r) (not qr))
+        (loop (cdr p) (cons (car p) q) r (not qr))))))
 
 ;;;-------------------------------------------------------------------
 
@@ -108,9 +108,8 @@
      (if (hashmap-empty? hm)
        (make-initial-trie! hm key value)
        (insert-entry! hm key value)))
-    ((hm key1 value1 . rest*)
-     (apply hashmap-set! (hashmap-set! hm key1 value1) rest*))
-    ((hm) hm)))
+    ((hm . rest*)
+     (hashmap-set-from-alist! hm (plist->alist rest*)))))
 
 (define (make-initial-trie! hm key value)
   (let* ((depth->popmap ((key->depth->popmap hm) key))
@@ -173,7 +172,7 @@
                      (set-entry! array i `(,key . ,value))
                      hm)
                    (grow-trie-at-pair
-                    pair1 depth (lambda (elem)
+                    depth pair1 (lambda (elem)
                                   (set-entry! array i elem))))))
 
              (define (grow-trie-at-pair deepness pair1 setter!)
