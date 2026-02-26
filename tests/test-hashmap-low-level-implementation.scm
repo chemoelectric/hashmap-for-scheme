@@ -85,15 +85,6 @@
     (test-equal (create-chain '(5 . 6) '(1 . 2)) a)))
 (test-end "chains")
 
-(let* ((test-result (test-runner-get))
-       (failure-count (test-runner-fail-count test-result)))
-  (cond ((zero? failure-count)
-         (display "\nno problems detected\n\n")
-         (exit 0))
-        (else
-         (display "\nproblems possibly were detected\n\n")
-         (exit 1))))
-
 ;;; local variables:
 ;;; mode: scheme
 ;;; geiser-scheme-implementation: chez

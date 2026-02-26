@@ -23,20 +23,28 @@ TSTPROG2_R6RS = tests/test-hashmap.sps
 TSTPROG1_R7RS = tests/test-hashmap-low-level.scm
 TSTPROG2_R7RS = tests/test-hashmap.scm
 
-# To test with Chez Scheme requires that one has installed SRFI
-# software, such as chez-srfi.
+# To test with Chez Scheme, one must install SRFI software, such as
+# chez-srfi.
 .PHONY: check-chez-r6rs
 check-chez-r6rs:
 	$(call check-chez-r6rs, $(TSTPROG1_R6RS) $(TSTPROG2_R6RS))
 
-# NOTE: I have had trouble with the SRFI-64 available in Snow.
+# You may have to install some software with snow-chibi or by other
+# means. (Also, last I tried it, Chibi’s SRFI-1 was incomplete and
+# non-compliant, though it was sufficient for this software.)
 .PHONY: check-chibi-r7rs
 check-chibi-r7rs:
 	$(call check-chibi-r7rs, $(TSTPROG1_R7RS) $(TSTPROG2_R7RS))
 
+# At the time of this writing, Gambit did not support R⁷RS
+# syntax-rules, nor could it export macros properly for R⁷RS. What
+# Gambit does have for syntax-rules is an ancient version of
+# syntax-case that accepts only trailing ellipses. However, Gambit
+# code can be among the fastest Scheme code, and compiled separately,
+# and so Gambit seems worth supporting.
 .PHONY: check-gambit-gsi-r7rs
 check-gambit-gsi-r7rs:
-	( \
+	@( \
 	  cd gambit && \
 	  $(GSI) -:r7rs,search=$${PWD} ../tests/test-hashmap-gambit-gsi.scm \
 	)
@@ -45,8 +53,8 @@ check-gambit-gsi-r7rs:
 check-gauche-r7rs:
 	$(call check-gauche-r7rs, $(TSTPROG1_R7RS) $(TSTPROG2_R7RS))
 
-# To test with Loko Scheme requires that one has installed SRFI
-# software, such as chez-srfi.
+# To test with Loko Scheme one must install SRFI software, such as
+# chez-srfi.
 .PHONY: check-loko-r6rs # check-loko-r7rs
 check-loko-r6rs:
 	$(call check-loko-r6rs, $(TSTPROG1_R6RS) $(TSTPROG2_R6RS))
@@ -58,3 +66,7 @@ check-sagittarius-r6rs:
 	$(call check-sagittarius-r6rs, $(TSTPROG1_R6RS) $(TSTPROG2_R6RS))
 check-sagittarius-r7rs:
 	$(call check-sagittarius-r7rs, $(TSTPROG1_R7RS) $(TSTPROG2_R7RS))
+
+.PHONY: clean
+clean:
+	-rm -f *.log

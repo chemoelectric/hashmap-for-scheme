@@ -16,13 +16,7 @@
           hashmap-set!
           hashmap-set-from-alist!)
 
-  (import (except (scheme base)
-                  assv assq assoc
-                  append cons list make-list length
-                  car cdr caar cadr cdar cddr
-                  set-car! set-cdr!
-                  for-each map list-copy list-ref
-                  member memv memq null? pair? reverse)
+  (import (scheme base)
           (scheme case-lambda))
   (import (hashmap define-record-factory)
           (hashmap low-level))
