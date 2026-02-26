@@ -19,7 +19,8 @@
                           (:let pair% (hashmap-ref hm s))
                           (:let s% (car pair%))
                           (:let i% (cdr pair%))
-                          (and (string=? s s%) (= i i%)))))
+                          (and (string=? s s%) (= i i%))))
+  (test-equal (length alst) (hashmap-size hm)))
 (test-end)
 
 ;;; local variables:

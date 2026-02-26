@@ -162,6 +162,7 @@
                      (set-entry! array1 (fx+ j 1)
                                  (get-entry-quickly array j))))
                  (setter! array1)
+                 (set-hashmap-size! hm (+ 1 (hashmap-size hm)))
                  hm))
 
              (define (insert-at-pair)
