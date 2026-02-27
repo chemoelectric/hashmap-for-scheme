@@ -1,4 +1,5 @@
 .DELETE_ON_ERROR:
+.PHONY: clean
 
 CHEZ = scheme
 CHIBI = chibi-scheme
@@ -67,9 +68,51 @@ check-sagittarius-r6rs:
 check-sagittarius-r7rs:
 	$(call check-sagittarius-r7rs, $(TSTPROG1_R7RS) $(TSTPROG2_R7RS))
 
-.PHONY: clean
-clean:
+clean::
 	-rm -f *.log
+
+#---------------------------------------------------------------------
+
+# CHICKEN 5 egg.
+
+CHICKEN_INSTALL_5 = chicken-install
+EGG_5_VERSION = 0.0.0
+
+chicken-5/hashmap.egg: GNUmakefile
+	awk 'BEGIN { \
+	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
+	  print " (version \"$(EGG_5_VERSION)\")"; \
+	  print " (category data)"; \
+	  print " (license \"MIT\")"; \
+	  print " (author \"Barry Schwartz\")"; \
+	  print " (dependencies r7rs srfi-1 srfi-143)"; \
+	  print " (component-options"; \
+	  print "  (csc-options \"-X\" \"r7rs\" \"-R\" \"r7rs\" \"-O3\"))"; \
+	  print " (components"; \
+	  print "  (extension hashmap.low-level"; \
+	  print "   (source \"hashmap.low-level.scm\"))"; \
+	  print "  (extension hashmap.define-record-factory"; \
+	  print "   (source \"hashmap.define-record-factory.scm\"))"; \
+	  print "  (extension hashmap.hashmap-structure"; \
+	  print "   (source \"hashmap.hashmap-structure.scm\")"; \
+	  print "   (component-dependencies hashmap.define-record-factory)"; \
+	  print "   (component-dependencies hashmap.low-level))"; \
+	  print "  (extension hashmap"; \
+	  print "   (source \"hashmap.scm\")"; \
+	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
+	}' > $(@)
+
+chicken-5/hashmap.so: chicken-5/hashmap.egg GNUmakefile
+	(cd chicken-5; $(CHICKEN_INSTALL_5) -n)
+
+clean::
+	-rm -f chicken-5/hashmap.build.sh
+	-rm -f chicken-5/hashmap.install.sh
+	-rm -f chicken-5/hashmap.egg
+	-rm -f chicken-5/hashmap*.so
+	-rm -f chicken-5/hashmap*.o
+	-rm -f chicken-5/hashmap*.link
+	-rm -f chicken-5/hashmap*.import.*
 
 #---------------------------------------------------------------------
 
@@ -78,15 +121,18 @@ clean:
 # under the name ‘chicken-install-6’.
 
 CHICKEN_INSTALL_6 = chicken-install-6
+EGG_6_VERSION = 0.0.0
 
 chicken-6/hashmap.egg: GNUmakefile
 	awk 'BEGIN { \
 	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
-	  print " (version \"0.0.0\")"; \
+	  print " (version \"$(EGG_6_VERSION)\")"; \
 	  print " (category data)"; \
 	  print " (license \"MIT\")"; \
 	  print " (author \"Barry Schwartz\")"; \
 	  print " (dependencies srfi-1 srfi-143)"; \
+	  print " (component-options"; \
+	  print "  (csc-options \"-O3\"))"; \
 	  print " (components"; \
 	  print "  (extension hashmap.low-level"; \
 	  print "   (source \"hashmap/low-level.sld\"))"; \
@@ -104,8 +150,7 @@ chicken-6/hashmap.egg: GNUmakefile
 chicken-6/hashmap.so: chicken-6/hashmap.egg GNUmakefile
 	(cd chicken-6; $(CHICKEN_INSTALL_6) -n)
 
-.PHONY: clean
-clean:
+clean::
 	-rm -f chicken-6/hashmap.build.sh
 	-rm -f chicken-6/hashmap.install.sh
 	-rm -f chicken-6/hashmap.egg
