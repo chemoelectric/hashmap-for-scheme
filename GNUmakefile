@@ -11,7 +11,7 @@ GAUCHE = gosh
 LOKO = loko
 SAGITTARIUS = sagittarius
 
-check = @$(foreach f,$(3),$(2)=$(PWD)$${$(2)+:}$${$(2)} $(1) $(f);)
+check = @$(foreach f,$(3),$(2)=.$${$(2)+:}$${$(2)} $(1) $(f);)
 
 check-chez-r6rs = $(call check,$(CHEZ) --program,CHEZSCHEMELIBDIRS,$(1))
 check-chibi-r7rs = $(call check,$(CHIBI),CHIBI_MODULE_PATH,$(1))
@@ -50,7 +50,7 @@ check-chibi-r7rs:
 check-gambit-gsi-r7rs:
 	@( \
 	  cd gambit && \
-	  $(GSI) -:r7rs,search=$(PWD) ../tests/test-hashmap-gambit-gsi.scm \
+	  $(GSI) -:r7rs,search=. ../tests/test-hashmap-gambit-gsi.scm \
 	)
 
 .PHONY: check-gauche-r7rs
