@@ -110,7 +110,9 @@ chicken-5/hashmap.egg: GNUmakefile
 	  print " (author \"Barry Schwartz\")"; \
 	  print " (dependencies r7rs srfi-1 srfi-143)"; \
 	  print " (component-options"; \
-	  print "  (csc-options \"-X\" \"r7rs\" \"-R\" \"r7rs\" \"-O3\"))"; \
+	  print "  (csc-options \"-X\" \"r7rs\" \"-R\" \"r7rs\" \"-O3\""; \
+	  print "               \"-fixnum-arithmetic\""; \
+	  print "               ))"; \
 	  print " (components"; \
 	  print "  (extension hashmap.low-level"; \
 	  print "   (source \"hashmap.low-level.scm\"))"; \
@@ -167,7 +169,9 @@ chicken-6/hashmap.egg: GNUmakefile
 	  print " (author \"Barry Schwartz\")"; \
 	  print " (dependencies srfi-1 srfi-143)"; \
 	  print " (component-options"; \
-	  print "  (csc-options \"-O3\"))"; \
+	  print "  (csc-options \"-O3\""; \
+	  print "               \"-fixnum-arithmetic\""; \
+	  print "               ))"; \
 	  print " (components"; \
 	  print "  (extension hashmap.low-level"; \
 	  print "   (source \"hashmap/low-level.sld\"))"; \
