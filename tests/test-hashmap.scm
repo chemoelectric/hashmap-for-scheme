@@ -9,17 +9,21 @@
 (cond-expand
   ((library (scheme list)) (import (scheme list)))
   ((library (srfi 1)) (import (srfi 1)))
-  (else (srfi srfi-1)))
+  (loko (import (srfi :1 lists)))
+  (else (import (srfi srfi-1))))
 (cond-expand
   ((library (scheme comparator)) (import (scheme comparator)))
   ((library (srfi 128)) (import (srfi 128)))
-  (else (srfi srfi-128)))
+  (loko (import (srfi :128 comparators)))
+  (else (import (srfi srfi-128))))
 (cond-expand
   ((library (srfi 42)) (import (srfi 42)))
-  (else (srfi srfi-42)))
+  (loko (import (srfi :42 eager-comprehensions)))
+  (else (import (srfi srfi-42))))
 (cond-expand
   ((library (srfi 64)) (import (srfi 64)))
-  (else (srfi srfi-64)))
+  (loko (import (srfi :64 testing)))
+  (else (import (srfi srfi-64))))
 
 (include "tests/test-hashmap-implementation.scm")
 
