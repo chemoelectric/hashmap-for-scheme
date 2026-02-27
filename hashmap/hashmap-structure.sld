@@ -14,7 +14,10 @@
           hashmap-empty?
           hashmap-ref
           hashmap-set!
-          hashmap-set-from-alist!)
+          hashmap-set-from-alist!
+
+          hashmap-delete!
+          hashmap-delete-from-list!)
 
   (import (scheme base)
           (scheme case-lambda))

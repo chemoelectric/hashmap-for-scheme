@@ -5,12 +5,18 @@
 
   (export make-hashmap
           alist->hashmap
+
           hashmap?
+
           hashmap-size
           hashmap-empty?
           hashmap-ref
+
           hashmap-set!
-          hashmap-set-from-alist!)
+          hashmap-set-from-alist!
+
+          hashmap-delete!
+          hashmap-delete-from-list!)
 
   (import (hashmap hashmap-structure)))
 

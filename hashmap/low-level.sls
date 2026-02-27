@@ -13,6 +13,7 @@
           set-entry!
 
           hash-bits-chunk-max
+          hash-bits-max
           hash-bits-exhausted?
           make-hash-bits-source
           hashfunc->popmapfunc

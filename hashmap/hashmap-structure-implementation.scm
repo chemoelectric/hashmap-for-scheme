@@ -60,6 +60,9 @@
         (loop (cdr p) (cons (car p) q) r (not qr))))))
 
 ;;;-------------------------------------------------------------------
+;;;
+;;; Retrieval from the structure.
+;;;
 
 (define (hashmap-empty? hm)
   (zero? (hashmap-size hm)))
@@ -101,6 +104,11 @@
                (let ((next-depth (fx+ depth 1)))
                  (loop entry next-depth
                        (depth->popmap next-depth)))))))))))
+
+;;;-------------------------------------------------------------------
+;;;
+;;; Insertion into the structure
+;;;
 
 (define hashmap-set!
   (case-lambda
@@ -236,6 +244,82 @@
     (if (null-list? p)
       hm
       (loop (cdr p) (hashmap-set! hm (caar p) (cdar p))))))
+
+;;;-------------------------------------------------------------------
+;;;
+;;; Deletion from the structure.
+;;;
+
+(define hashmap-delete!
+  (case-lambda
+    ((hm key)
+     ;;
+     ;; Whether the key is found can be detected by looking for a
+     ;; change in hashmap size.
+     ;;
+     (case (hashmap-size hm)
+       ((0) hm)
+       ((1) (begin
+              (when (hashmap-ref hm key)
+                (set-hashmap-size! hm 0)
+                (set-hashmap-trie! hm #f))
+              hm))
+       (else (delete-from-trie! hm key) )))
+    ((hm . rest*)
+     ;;
+     ;; Multiple keys can listed in the command.
+     ;;
+     (hashmap-delete-from-list! hm rest*))))
+
+(define (delete-from-trie! hm key)
+  ;;
+  ;; The approach here is to search as if for retrieval, but to build
+  ;; a record of the route taken. That record can be used to construct
+  ;; a smaller subtrie, going backwards.
+  ;;
+  (let* ((route-max
+          (fx+ (fxquotient (hash-bits-max) (hash-bits-chunk-max))
+               (fxremainder (hash-bits-max) (hash-bits-chunk-max))))
+         (route (make-vector route-max))
+         (depth (fill-route! route hm key)))
+    (when depth
+      
+      'xxxx)
+    hm))
+
+(define (fill-route! route hm key)
+  (let ((depth->popmap ((key->depth->popmap hm) key)))
+    (let loop ((array (hashmap-trie hm))
+               (depth 0)
+               (pm (depth->popmap 0)))
+      (vector-set! route depth `(,array . ,pm))
+      (if (hash-bits-exhausted? pm)
+        #f
+        (let* ((mask (fx- pm 1))
+               (i (fxbit-count
+                   (fxand mask (get-population-map array))))
+               (entry (get-entry array i)))
+          (cond
+            ((not entry) #f)
+            ((pair? entry)
+             (let ((equiv? (hashmap-equiv? hm))
+                   (k (car entry)))
+               (if (equiv? key k) depth #f)))
+            ((chain? entry)
+             (let* ((equiv? (hashmap-equiv? hm))
+                    (matches? (lambda (k) (equiv? key k))))
+               (if (search-chain entry matches?) depth #f)))
+            (else
+             (let ((next-depth (fx+ depth 1)))
+               (loop entry next-depth
+                     (depth->popmap next-depth))))))))))
+
+(define (hashmap-delete-from-list! hm lst)
+  (let loop ((p lst)
+             (hm hm))
+    (if (null-list? p)
+      hm
+      (loop (cdr p) (hashmap-delete! hm (car p))))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:
