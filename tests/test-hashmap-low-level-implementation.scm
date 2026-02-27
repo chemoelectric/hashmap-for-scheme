@@ -1,13 +1,55 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
+(display " ===== test-hashmap-low-level =====\n")
+
 (define hash-bits-limit 12)
 
 (define-syntax number-matches?
   (syntax-rules ()
     ((¶ n) (lambda (x) (= x n)))))
 
-(test-begin "hashes")
+(define successes 0)
+(define failures 0)
+
+(define-syntax test-assert
+  (syntax-rules ()
+    ((¶ asserted)
+     (let ((a ((lambda () asserted))))
+       (if a
+         (set! successes (+ successes 1))
+         (begin
+           (set! failures (+ failures 1))
+           (display "failed: ")
+           (display 'asserted)
+           (newline)))))))
+
+(define-syntax test-equal
+  (syntax-rules ()
+    ((¶ expected tested)
+     (let ((e ((lambda () expected)))
+           (t ((lambda () tested))))
+       (if (equal? e t)
+         (set! successes (+ successes 1))
+         (begin
+           (set! failures (+ failures 1))
+           (display "failed: ")
+           (display 'tested)
+           (newline)))))))
+
+(define-syntax test-eq
+  (syntax-rules ()
+    ((¶ expected tested)
+     (let ((e ((lambda () expected)))
+           (t ((lambda () tested))))
+       (if (eq? e t)
+         (set! successes (+ successes 1))
+         (begin
+           (set! failures (+ failures 1))
+           (display "failed: ")
+           (display 'tested)
+           (newline)))))))
+
 (let ((hbsrc (make-hash-bits-source #b10101)))
   (test-equal #b10101 (hbsrc 0)))
 (let ((hbsrc (make-hash-bits-source
@@ -33,9 +75,7 @@
                           (hash-bits-chunk-max))))))
   (test-eq #f (hash-bits-exhausted? (hbsrc (- hash-bits-limit 1))))
   (test-eq #t (hash-bits-exhausted? (hbsrc hash-bits-limit))))
-(test-end "hashes")
 
-(test-begin "chains")
 (let ((chain (create-chain '(1 . 2) '(3 . 4))))
   (test-equal #f (search-chain chain (number-matches? 0)))
   (test-equal '(1 . 2) (search-chain chain (number-matches? 1)))
@@ -83,7 +123,11 @@
     (test-equal 1 n)
     (test-equal -1 b)
     (test-equal (create-chain '(5 . 6) '(1 . 2)) a)))
-(test-end "chains")
+
+(display successes)
+(display " successes\n")
+(display failures)
+(display " failures\n")
 
 ;;; local variables:
 ;;; mode: scheme

@@ -40,6 +40,21 @@ check-chez-r6rs:
 check-chibi-r7rs:
 	$(call check-chibi-r7rs, $(TSTPROG1_R7RS) $(TSTPROG2_R7RS))
 
+.PHONY: check-chicken-5-r7rs check-chicken-6-r7rs
+check-chicken-5-r7rs: chicken-5/hashmap.so
+	@( \
+	  export CHICKEN_REPOSITORY_PATH=chicken-5:$(CHICKEN_5_REPOSITORY_PATH); \
+	  $(CSI_5) -s $(TSTPROG1_R7RS); \
+	  $(CSI_5) -s $(TSTPROG2_R7RS) \
+	)
+
+check-chicken-6-r7rs: chicken-6/hashmap.so
+	@( \
+	  export CHICKEN_REPOSITORY_PATH=chicken-6:$(CHICKEN_6_REPOSITORY_PATH); \
+	  $(CSI_6) -s $(TSTPROG1_R7RS); \
+	  $(CSI_6) -s $(TSTPROG2_R7RS) \
+	)
+
 # At the time of this writing, Gambit did not support R⁷RS
 # syntax-rules, nor could it export macros properly for R⁷RS. What
 # Gambit does have for syntax-rules is an ancient version of
@@ -75,11 +90,16 @@ clean::
 	-rm -f *.log
 
 #---------------------------------------------------------------------
-
+#
 # CHICKEN 5 egg.
+#
 
-CHICKEN_INSTALL_5 = chicken-install
 EGG_5_VERSION = 0.0.0
+
+CSI_5 = csi
+CHICKEN_INSTALL_5 = chicken-install
+
+CHICKEN_5_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_5) -repository)
 
 chicken-5/hashmap.egg: GNUmakefile
 	awk 'BEGIN { \
@@ -105,7 +125,12 @@ chicken-5/hashmap.egg: GNUmakefile
 	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
 	}' > $(@)
 
-chicken-5/hashmap.so: chicken-5/hashmap.egg GNUmakefile
+chicken-5/hashmap.so: chicken-5/hashmap.egg chicken-5/hashmap.scm \
+	              chicken-5/hashmap.define-record-factory.scm \
+	              hashmap/hashmap-structure-implementation.scm \
+	              hashmap/low-level-implementation.scm \
+	              hashmap/hashmap-structure.sld \
+	              hashmap/low-level.sld
 	(cd chicken-5; $(CHICKEN_INSTALL_5) -n)
 
 clean::
@@ -118,13 +143,20 @@ clean::
 	-rm -f chicken-5/hashmap*.import.*
 
 #---------------------------------------------------------------------
+#
+# CHICKEN 6 egg.
+#
 
-# CHICKEN 6 egg. At the time of this writing, CHICKEN 6 is not yet
-# released. Thus I have my own copy of ‘chicken-install’ for version 6
-# under the name ‘chicken-install-6’.
-
-CHICKEN_INSTALL_6 = chicken-install-6
 EGG_6_VERSION = 0.0.0
+
+#
+# At the time of this writing, CHICKEN 6 is not yet released. Thus I
+# have my CHICKEN 6 commands installed with "-6" suffices.
+#
+CSI_6 = csi-6
+CHICKEN_INSTALL_6 = chicken-install-6
+
+CHICKEN_6_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_6) -repository)
 
 chicken-6/hashmap.egg: GNUmakefile
 	awk 'BEGIN { \
@@ -150,7 +182,12 @@ chicken-6/hashmap.egg: GNUmakefile
 	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
 	}' > $(@)
 
-chicken-6/hashmap.so: chicken-6/hashmap.egg GNUmakefile
+chicken-6/hashmap.so: chicken-6/hashmap.egg hashmap.sld \
+	              hashmap/hashmap-structure-implementation.scm \
+	              hashmap/low-level-implementation.scm \
+	              hashmap/define-record-factory.sld \
+	              hashmap/hashmap-structure.sld \
+	              hashmap/low-level.sld
 	(cd chicken-6; $(CHICKEN_INSTALL_6) -n)
 
 clean::

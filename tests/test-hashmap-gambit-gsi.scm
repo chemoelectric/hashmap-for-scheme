@@ -5,9 +5,8 @@
         (scheme process-context)
         (scheme write)
         (hashmap))
-(import (srfi 69))
 (import (srfi 42))
-(import (srfi 64))
+(import (srfi 69))
 
 (include "test-hashmap-implementation.scm")
 

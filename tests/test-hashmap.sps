@@ -9,7 +9,6 @@
         (rnrs r5rs (6))
         (srfi :1 lists)
         (srfi :42 eager-comprehensions)
-        (srfi :64 testing)
         (srfi :128 comparators)
         (hashmap hashmap-include)
         (hashmap))

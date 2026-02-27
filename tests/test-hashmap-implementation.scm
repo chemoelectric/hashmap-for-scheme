@@ -1,7 +1,49 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
-(test-begin "big alist of strings -> hashmap")
+(display " ===== test-hashmap =====\n")
+
+(define successes 0)
+(define failures 0)
+
+(define-syntax test-assert
+  (syntax-rules ()
+    ((¶ asserted)
+     (let ((a ((lambda () asserted))))
+       (if a
+         (set! successes (+ successes 1))
+         (begin
+           (set! failures (+ failures 1))
+           (display "failed: ")
+           (display 'asserted)
+           (newline)))))))
+
+(define-syntax test-equal
+  (syntax-rules ()
+    ((¶ expected tested)
+     (let ((e ((lambda () expected)))
+           (t ((lambda () tested))))
+       (if (equal? e t)
+         (set! successes (+ successes 1))
+         (begin
+           (set! failures (+ failures 1))
+           (display "failed: ")
+           (display 'tested)
+           (newline)))))))
+
+(define-syntax test-eq
+  (syntax-rules ()
+    ((¶ expected tested)
+     (let ((e ((lambda () expected)))
+           (t ((lambda () tested))))
+       (if (eq? e t)
+         (set! successes (+ successes 1))
+         (begin
+           (set! failures (+ failures 1))
+           (display "failed: ")
+           (display 'tested)
+           (newline)))))))
+
 (let* ((make-string-hashmap
         (lambda arg*
           (apply make-hashmap (cons* string=? string-hash arg*))))
@@ -30,9 +72,7 @@
                             (:let i% (cdr pair%))
                             (and (string=? s s%) (= i i%))))
     (test-equal (length alst) (hashmap-size hm))))
-(test-end)
 
-(test-begin "tiny hash function")
 (let* ((tiny-hash (lambda (str) (remainder (string-hash str) 2)))
        (make-tiny-hashmap
         (lambda arg*
@@ -53,7 +93,11 @@
                           (:let i% (cdr pair%))
                           (and (string=? s s%) (= i i%))))
   (test-equal (length alst) (hashmap-size hm)))
-(test-end)
+
+(display successes)
+(display " successes\n")
+(display failures)
+(display " failures\n")
 
 ;;; local variables:
 ;;; mode: scheme

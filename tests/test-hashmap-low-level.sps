@@ -9,7 +9,6 @@
         (rnrs r5rs (6))
         (srfi :1 lists)
         (srfi :143 fixnums)
-        (srfi :64 testing)
         (hashmap low-level)
         (hashmap hashmap-include))
 
