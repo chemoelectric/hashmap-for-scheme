@@ -20,6 +20,7 @@
           hashmap-delete-from-list!)
 
   (import (scheme base)
+          (scheme write) ;; For debugging.
           (scheme case-lambda))
   (import (hashmap define-record-factory)
           (hashmap low-level))
