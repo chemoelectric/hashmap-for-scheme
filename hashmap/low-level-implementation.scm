@@ -93,6 +93,10 @@
     ((¶ pair1 pair2)
      (vector #f (list pair1 pair2)))))
 
+(define-syntax chain->alist
+  (syntax-rules ()
+    ((¶ chain) (vector-ref chain 1))))
+
 (define-syntax search-chain
   ;;
   ;; Return either #f or the key-value cons-pair that matches.

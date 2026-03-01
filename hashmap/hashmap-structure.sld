@@ -17,7 +17,9 @@
           hashmap-set-from-alist!
 
           hashmap-delete!
-          hashmap-delete-from-list!)
+          hashmap-delete-from-list!
+
+          hashmap->alist)
 
   (import (scheme base)
           (scheme write) ;; For debugging.

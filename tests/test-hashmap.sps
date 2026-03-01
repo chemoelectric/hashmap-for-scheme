@@ -4,6 +4,7 @@
 #!r6rs
 
 (import (except (rnrs base (6)) for-each map)
+        (rnrs control (6))
         (rnrs programs (6))
         (rnrs io simple (6))
         (rnrs r5rs (6))

@@ -264,7 +264,9 @@
                 (set-hashmap-size! hm 0)
                 (set-hashmap-trie! hm #f))
               hm))
-       (else (delete-from-trie! hm key) )))
+       (else (begin
+               (delete-from-trie! hm key)
+               hm))))
     ((hm . rest*)
      ;;
      ;; Multiple keys can listed in the command.
@@ -452,15 +454,35 @@
           ((fxzero? depth)
            (set-hashmap-trie! hm (shrink-foundation-array)))
           (else (rebuild-subtrie!)))
-        (set-hashmap-size! hm (- (hashmap-size hm) 1)))
-      hm)))
+        (set-hashmap-size! hm (- (hashmap-size hm) 1))))))
 
 (define (hashmap-delete-from-list! hm lst)
-  (let loop ((p lst)
-             (hm hm))
-    (if (null-list? p)
-      hm
-      (loop (cdr p) (hashmap-delete! hm (car p))))))
+  (do ((p lst (cdr p)))
+      ((null-list? p))
+    (hashmap-delete! hm (car p)))
+  hm)
+
+;;;-------------------------------------------------------------------
+;;;
+;;; Walking the trie.
+;;;
+
+(define (hashmap->alist hm)
+  ;;
+  ;; Walk the trie and list the pairs found, in any order. (I DO NOT
+  ;; specify that the order must be the same from run to run.)
+  ;;
+  (if (hashmap-empty? hm)
+    '()
+    (let recurs ((array (hashmap-trie hm)))
+      (concatenate
+       (map (lambda (i)
+              (let ((entry (get-entry-quickly array i)))
+                (cond
+                  ((pair? entry) (list entry))
+                  ((chain? entry) (chain->alist entry))
+                  (else (recurs entry)))))
+            (iota (array-size array)))))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:

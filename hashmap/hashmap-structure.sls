@@ -18,7 +18,9 @@
           hashmap-set-from-alist!
 
           hashmap-delete!
-          hashmap-delete-from-list!)
+          hashmap-delete-from-list!
+
+          hashmap->alist)
 
   (import (rename (except (rnrs base (6)) for-each map)
                   (error r6rs-error))
