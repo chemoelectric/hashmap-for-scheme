@@ -491,56 +491,52 @@
   ;; same from run to run.)
   ;;
   ;; When the generator is finished returning key-value pairs, it
-  ;; returns eof-object whenever called.
+  ;; returns an end-of-file object whenever called.
   ;;
   (if (hashmap-empty? hm)
-    (lambda () eof-object)
-    (let* ((trie-and-index* (list `(,(hashmap-trie hm) . 0)))
-           (next! (lambda ()
-                    (let-values (((hd tl) (car+cdr trie-and-index*)))
-                      (set! trie-and-index*
-                        (cons `(,(car hd) . ,(fx+ (cdr hd) 1))
-                              tl)))))
-           (pop! (lambda ()
-                   (set! trie-and-index* (cdr trie-and-index*))
-                   (next!)))
-           (push! (lambda (trie i)
-                    (set! trie-and-index*
-                      (cons `(,trie . ,i) trie-and-index*))))
-           (end-of-sequence (eof-object)))
+
+    (lambda () (eof-object))
+
+    (let ((trie (hashmap-trie hm)))
+
+      (define suspend '<undefined>)
+
+      (define resume-generator
+        (lambda (ε)
+
+          ;; ε is the point in the program where the generator
+          ;; was called.
+          (let ((caller-of-generator ε))
+
+            (define (suspension-procedure value)
+              (call/cc
+               (lambda (cc)
+                 ;; Resume at the point following the ‘suspend’.
+                 (set! resume-generator cc)
+                 ;; Perform the suspension.
+                 (set! caller-of-generator
+                   (caller-of-generator value)))))
+
+            (set! suspend suspension-procedure)
+
+            (let recurs ((array trie))
+              (let ((n (array-size array)))
+                (do ((i 0 (fx+ i 1)))
+                    ((fx=? i n))
+                  (let ((entry (get-entry-quickly array i)))
+                    (cond
+                      ((pair? entry)
+                       (suspend entry))
+                      ((chain? entry)
+                       (for-each suspend (chain->alist entry)))
+                      (else (recurs entry)))))))
+
+            (set! resume-generator (lambda () (eof-object)))
+            (resume-generator))))
+
       (lambda ()
-        (let loop ()
-          (let-values (((trie i) (car+cdr (car trie-and-index*))))
-            (cond
-              ((pair? trie)
-               ;; Return a key-value pair from a chain.
-               (let-values (((result tail) (car+cdr trie)))
-                 (if (pair? tail)
-                   (set! trie-and-index*
-                     (cons `(,tail . #f) (cdr trie-and-index*)))
-                   (pop!))
-                 result))
-              ((fx=? i (array-size trie))
-               (cond
-                 ((null? (cdr trie-and-index*))
-                  ;; All key-value pairs have been returned.
-                  end-of-sequence)
-                 (else
-                  (pop!)
-                  (loop))))
-              ((chain? trie)
-               (push! (chain->alist trie) #f)
-               (loop))
-              (else
-               (let ((entry (get-entry-quickly trie i)))
-                 (cond
-                   ((pair? entry)
-                    ;; Return a key-value pair from an array.
-                    (next!)
-                    entry)
-                   (else
-                    (push! trie 0)
-                    (loop))))))))))))
+        (call/cc
+         (lambda (ε) (resume-generator ε)))))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:
