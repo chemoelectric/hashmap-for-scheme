@@ -10,5 +10,5 @@ locations, in the manner of a malloc. Garbage collection is not
 required. I may one day add this implementation as FFI for compatible
 Schemes.]
 
-The library is still under development. Tree walking has not yet been
-written.
+The library is now in working condition.
+
