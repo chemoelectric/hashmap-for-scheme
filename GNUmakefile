@@ -4,6 +4,8 @@
 .DELETE_ON_ERROR:
 .PHONY: clean
 
+VERSION = 0.0.0
+
 CHEZ = scheme
 CHIBI = chibi-scheme
 GSI = gsi
@@ -94,7 +96,7 @@ clean::
 # CHICKEN 5 egg.
 #
 
-EGG_5_VERSION = 0.0.0
+EGG_5_VERSION = $(VERSION)
 
 CSI_5 = csi
 CHICKEN_INSTALL_5 = chicken-install
@@ -149,7 +151,7 @@ clean::
 # CHICKEN 6 egg.
 #
 
-EGG_6_VERSION = 0.0.0
+EGG_6_VERSION = $(VERSION)
 
 #
 # At the time of this writing, CHICKEN 6 is not yet released. Thus I

@@ -285,6 +285,18 @@
          (depth 0)
          (deepest-depth 0))
 
+    (define-syntax $array
+      (syntax-rules ()
+        ((¶) 0)))
+
+    (define-syntax $pm
+      (syntax-rules ()
+        ((¶) 1)))
+
+    (define-syntax $i
+      (syntax-rules ()
+        ((¶) 2)))
+
     (define (fill-route!)
       (let loop ((array (hashmap-trie hm))
                  (pm (depth->popmap 0)))
@@ -294,7 +306,7 @@
                  (i (fxbit-count
                      (fxand mask (get-population-map array))))
                  (entry (get-entry array i)))
-            (vector-set! route depth (vector array pm mask i))
+            (vector-set! route depth (vector array pm i))
             (cond
               ((not entry) #f)
               ((pair? entry)
@@ -329,10 +341,9 @@
 
     (define (rebuild-subtrie!)
       (let* ((level (vector-ref route depth))
-             (array (vector-ref level 0))
-             (pm (vector-ref level 1))
-             (mask (vector-ref level 2))
-             (i (vector-ref level 3))
+             (array (vector-ref level ($array)))
+             (pm (vector-ref level ($pm)))
+             (i (vector-ref level ($i)))
              (popmap (get-population-map array))
              (new-popmap (fxxor popmap pm))
              (n (array-size array))
@@ -362,8 +373,8 @@
               (when (pair? entry)
                 (let* ((depth% (fx- depth 1))
                        (level% (vector-ref route depth%))
-                       (array% (vector-ref level% 0))
-                       (i% (vector-ref level% 3)))
+                       (array% (vector-ref level% ($array)))
+                       (i% (vector-ref level% ($i))))
                   (set-entry! array% i% entry)
                   (set! depth depth%)
                   (rebuild-subtrie!)))))
@@ -377,8 +388,8 @@
             (let* ((entry1 (get-entry-quickly array (fx- 1 i)))
                    (depth% (fx- depth 1))
                    (level% (vector-ref route depth%))
-                   (array% (vector-ref level% 0))
-                   (i% (vector-ref level% 3)))
+                   (array% (vector-ref level% ($array)))
+                   (i% (vector-ref level% ($i))))
               (cond
                 ((pair? entry1)
                  ;; Replace the current array with the key-value pair
@@ -398,8 +409,8 @@
             ;; current array. No other action is needed.
             (let* ((depth% (fx- depth 1))
                    (level% (vector-ref route depth%))
-                   (array% (vector-ref level% 0))
-                   (i% (vector-ref level% 3)))
+                   (array% (vector-ref level% ($array)))
+                   (i% (vector-ref level% ($i))))
               (set-entry! array% i% (current-array-shrunken))))
           ;;
           (if (fx=? n 2)
@@ -414,10 +425,9 @@
 
     (define (shrink-foundation-array)
       (let* ((array (hashmap-trie hm))
-             (level (vector-ref route 0))
-             (pm (vector-ref level 1))
-             (mask (vector-ref level 2))
-             (i (vector-ref level 3))
+             (level (vector-ref route ($array)))
+             (pm (vector-ref level ($pm)))
+             (i (vector-ref level ($i)))
              (popmap (get-population-map array))
              (new-popmap (fxxor popmap pm))
              (n (array-size array))
