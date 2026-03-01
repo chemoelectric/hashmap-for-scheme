@@ -28,7 +28,11 @@
          (begin
            (set! failures (+ failures 1))
            (display "failed: ")
+           (display "(equal? ")
+           (display 'expected)
+           (display " ")
            (display 'tested)
+           (display ")")
            (newline)))))))
 
 (define-syntax test-eq
@@ -41,13 +45,14 @@
          (begin
            (set! failures (+ failures 1))
            (display "failed: ")
+           (display "(eq? ")
+           (display 'expected)
+           (display " ")
            (display 'tested)
+           (display ")")
            (newline)))))))
 
-(let* ((make-string-hashmap
-        (lambda arg*
-          (apply make-hashmap (cons* string=? string-hash arg*))))
-       (alist->string-hashmap
+(let* ((alist->string-hashmap
         (lambda (alst)
           (alist->hashmap string=? string-hash alst)))
        (alst (list-ec (:range i 1 1000001)
@@ -74,9 +79,6 @@
     (test-equal (length alst) (hashmap-size hm))))
 
 (let* ((tiny-hash (lambda (str) (remainder (string-hash str) 2)))
-       (make-tiny-hashmap
-        (lambda arg*
-          (apply make-hashmap (cons* string=? tiny-hash arg*))))
        (alist->tiny-hashmap
         (lambda (alst)
           (alist->hashmap string=? tiny-hash alst)))
@@ -93,6 +95,26 @@
                           (:let i% (cdr pair%))
                           (and (string=? s s%) (= i i%))))
   (test-equal (length alst) (hashmap-size hm)))
+
+(let* ((tiny-hash (lambda (str) (remainder (string-hash str) 2)))
+       (alist->string-hashmap
+        (lambda (alst)
+          (alist->hashmap string=? #;tiny-hash string-hash alst)))
+       (alst1 (list-ec (:range i 1 2000001)
+                       `(,(number->string i 16) . ,i)))
+       (hm1 (alist->string-hashmap alst1))
+       (lst2 (list-ec (:range i 1 2000001 2)
+                      (number->string i 16)))
+       (hm2 (hashmap-delete-from-list! hm1 lst2)))
+  (test-assert (every?-ec (:list pair (index j) alst1)
+                          (if (odd? j))
+                          (:let s (car pair))
+                          (:let i (cdr pair))
+                          (:let pair% (hashmap-ref hm2 s))
+                          (:let s% (car pair%))
+                          (:let i% (cdr pair%))
+                          (and (string=? s s%) (= i i%))))
+  (test-equal 1000000 (hashmap-size hm2)))
 
 (display successes)
 (display " successes\n")

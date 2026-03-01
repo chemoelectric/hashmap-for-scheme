@@ -34,7 +34,11 @@
          (begin
            (set! failures (+ failures 1))
            (display "failed: ")
+           (display "(equal? ")
+           (display 'expected)
+           (display " ")
            (display 'tested)
+           (display ")")
            (newline)))))))
 
 (define-syntax test-eq
@@ -47,7 +51,11 @@
          (begin
            (set! failures (+ failures 1))
            (display "failed: ")
+           (display "(eq? ")
+           (display 'expected)
+           (display " ")
            (display 'tested)
+           (display ")")
            (newline)))))))
 
 (let ((hbsrc (make-hash-bits-source #b10101)))

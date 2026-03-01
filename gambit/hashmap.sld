@@ -37,8 +37,8 @@
 
     (define-syntax hash-bits-chunk-max
       ;;
-      ;; WARNING: This value is for a 64-bit architecture. For a 32-bit
-      ;;          architecture, change the value to 4.
+      ;; WARNING: This value is for eight-byte fixnums. For four-byte
+      ;; fixnums, change the value to 4.
       ;;
       (syntax-rules ()
         ((¶) 5)))
@@ -47,12 +47,10 @@
       ;;
       ;; We use the 60 least significant bits. This is the size of a
       ;; fixnum in Chez Scheme, and hopefully is as small as a fixnum
-      ;; gets in a 64-bit system.
+      ;; gets.
       ;;
-      ;; WARNING: 32-bit architectures are not supported. Also if the
-      ;;          size of a fixnum is less than 60, that is not
-      ;;          supported. If necessary, change the number 60 to a
-      ;;          lower number.
+      ;; WARNING: If necessary, change the number 60 to a lower
+      ;; number.
       ;;
       (syntax-rules ()
         ((¶) 60)))
