@@ -425,7 +425,7 @@
 
     (define (shrink-foundation-array)
       (let* ((array (hashmap-trie hm))
-             (level (vector-ref route ($array)))
+             (level (vector-ref route 0))
              (pm (vector-ref level ($pm)))
              (i (vector-ref level ($i)))
              (popmap (get-population-map array))
