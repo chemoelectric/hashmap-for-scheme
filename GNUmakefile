@@ -114,6 +114,7 @@ chicken-5/hashmap.egg: GNUmakefile
 	  print " (component-options"; \
 	  print "  (csc-options \"-X\" \"r7rs\" \"-R\" \"r7rs\" \"-O3\""; \
 	  print "               \"-fixnum-arithmetic\""; \
+	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
 	  print "  (extension hashmap.low-level"; \
@@ -173,6 +174,7 @@ chicken-6/hashmap.egg: GNUmakefile
 	  print " (component-options"; \
 	  print "  (csc-options \"-O3\""; \
 	  print "               \"-fixnum-arithmetic\""; \
+	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
 	  print "  (extension hashmap.low-level"; \

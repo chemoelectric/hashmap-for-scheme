@@ -11,4 +11,3 @@ required. I may one day add this implementation as FFI for compatible
 Schemes.]
 
 The library is now in working condition.
-
