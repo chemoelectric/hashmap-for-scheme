@@ -7,6 +7,7 @@
   (export make-hashmap
           alist->hashmap
           hashmap->alist
+          hashmap->generator
 
           hashmap?
 

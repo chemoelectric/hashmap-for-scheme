@@ -20,11 +20,12 @@
           hashmap-delete!
           hashmap-delete-from-list!
 
-          hashmap->alist)
+          hashmap->alist
+          hashmap->generator)
 
   (import (rename (except (rnrs base (6)) for-each map)
                   (error r6rs-error))
-          (rnrs io simple (6)) ;; For debugging.
+          (rnrs io simple (6))
           (rnrs control (6))
           (rnrs mutable-pairs (6))
           (srfi :1 lists)

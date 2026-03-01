@@ -469,8 +469,8 @@
 
 (define (hashmap->alist hm)
   ;;
-  ;; Walk the trie and list the pairs found, in any order. (I DO NOT
-  ;; specify that the order must be the same from run to run.)
+  ;; Walk the trie and list the key-value pairs, in any order. (I DO
+  ;; NOT specify that the order must be the same from run to run.)
   ;;
   (if (hashmap-empty? hm)
     '()
@@ -483,6 +483,64 @@
                   ((chain? entry) (chain->alist entry))
                   (else (recurs entry)))))
             (iota (array-size array)))))))
+
+(define (hashmap->generator hm)
+  ;;
+  ;; Make a generator that walks the trie and returns the key-value
+  ;; pairs, in any order. (I DO NOT specify that the order must be the
+  ;; same from run to run.)
+  ;;
+  ;; When the generator is finished returning key-value pairs, it
+  ;; returns eof-object whenever called.
+  ;;
+  (if (hashmap-empty? hm)
+    (lambda () eof-object)
+    (let* ((trie-and-index* (list `(,(hashmap-trie hm) . 0)))
+           (next! (lambda ()
+                    (let-values (((hd tl) (car+cdr trie-and-index*)))
+                      (set! trie-and-index*
+                        (cons `(,(car hd) . ,(fx+ (cdr hd) 1))
+                              tl)))))
+           (pop! (lambda ()
+                   (set! trie-and-index* (cdr trie-and-index*))
+                   (next!)))
+           (push! (lambda (trie i)
+                    (set! trie-and-index*
+                      (cons `(,trie . ,i) trie-and-index*))))
+           (end-of-sequence (eof-object)))
+      (lambda ()
+        (let loop ()
+          (let-values (((trie i) (car+cdr (car trie-and-index*))))
+            (cond
+              ((pair? trie)
+               ;; Return a key-value pair from a chain.
+               (let-values (((result tail) (car+cdr trie)))
+                 (if (pair? tail)
+                   (set! trie-and-index*
+                     (cons `(,tail . #f) (cdr trie-and-index*)))
+                   (pop!))
+                 result))
+              ((fx=? i (array-size trie))
+               (cond
+                 ((null? (cdr trie-and-index*))
+                  ;; All key-value pairs have been returned.
+                  end-of-sequence)
+                 (else
+                  (pop!)
+                  (loop))))
+              ((chain? trie)
+               (push! (chain->alist trie) #f)
+               (loop))
+              (else
+               (let ((entry (get-entry-quickly trie i)))
+                 (cond
+                   ((pair? entry)
+                    ;; Return a key-value pair from an array.
+                    (next!)
+                    entry)
+                   (else
+                    (push! trie 0)
+                    (loop))))))))))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:
