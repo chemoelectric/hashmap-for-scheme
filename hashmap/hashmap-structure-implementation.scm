@@ -65,7 +65,7 @@
 ;;;
 
 (define (hashmap-empty? hm)
-  (zero? (hashmap-size hm)))
+  (fxzero? (hashmap-size hm)))
 
 (define (hashmap-ref hm key)
   ;;
@@ -141,7 +141,7 @@
                (number (add-to-chain! chain matches?
                                       `(,key . ,value))))
           (unless (fxzero? number)
-            (set-hashmap-size! hm (+ 1 (hashmap-size hm))))
+            (set-hashmap-size! hm (fx+ 1 (hashmap-size hm))))
           hm))
 
       (let ((pm (depth->popmap depth)))
@@ -170,7 +170,7 @@
                      (set-entry! array1 (fx+ j 1)
                                  (get-entry-quickly array j))))
                  (setter! array1)
-                 (set-hashmap-size! hm (+ 1 (hashmap-size hm)))
+                 (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
                  hm))
 
              (define (insert-at-pair)
@@ -197,21 +197,21 @@
                     (let ((chain (create-chain `(,key . ,value)
                                                pair1)))
                       (setter! chain)
-                      (set-hashmap-size! hm (+ 1 (hashmap-size hm)))
+                      (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
                       hm))
                    ((fx<? pm% pm1%)
                     (let ((array1
                            (make-array-node (fxior pm% pm1%)
                                             `(,key . ,value) pair1)))
                       (setter! array1)
-                      (set-hashmap-size! hm (+ 1 (hashmap-size hm)))
+                      (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
                       hm))
                    ((fx<? pm1% pm%)
                     (let ((array1
                            (make-array-node (fxior pm% pm1%)
                                             pair1 `(,key . ,value))))
                       (setter! array1)
-                      (set-hashmap-size! hm (+ 1 (hashmap-size hm)))
+                      (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
                       hm))
                    (else
                     (let* ((array1 (make-vector 2))
@@ -321,7 +321,7 @@
                  (let-values (((rest-of-chain size-change)
                                (delete-from-chain! entry matches?)))
                    (cond
-                     ((zero? size-change) #f)
+                     ((fxzero? size-change) #f)
                      ((pair? rest-of-chain)
                       ;; The chain is gone and there is now just a
                       ;; key-value pair. Go straight to ‘middle
@@ -454,7 +454,7 @@
           ((fxzero? depth)
            (set-hashmap-trie! hm (shrink-foundation-array)))
           (else (rebuild-subtrie!)))
-        (set-hashmap-size! hm (- (hashmap-size hm) 1))))))
+        (set-hashmap-size! hm (fx- (hashmap-size hm) 1))))))
 
 (define (hashmap-delete-from-list! hm lst)
   (do ((p lst (cdr p)))
