@@ -1,38 +1,61 @@
 = Hashmaps for Scheme
 
-An implementation of hash array mapped tries for Scheme. This
-implementation may be used directly or as an underlying hashmap
-implementation for, say, SRFI-146.footnote:[I have long had an ATS2
-implementation of hash tries. Once translated from ATS2, this can be
-compiled with just a C compiler. It employs proofs and linear types
-for safety and requires only that stored objects be allocated to fixed
-locations, in the manner of a malloc. Garbage collection is not
-required. I may one day add this implementation as FFI for compatible
-Schemes.]
-
-The maps are mutable and in-place. However, all operations that modify
-the map return the map as value, so code can be written as if the map
-were ‘linear updating’.
+An implementation of hash array mapped tries for Scheme. The maps are
+mutable and in-place.footnote:[Implementing SRFI-146 hashmaps with
+this package would often require copying the whole structure, though
+not the keys and values. SRFI-146 effectively presumes—though
+carefully does not require—a persistent structure: one whose
+operations do not alter what is already written. Operations that do
+not copy the whole structure might be added at some point. However, a
+non-persistent hashmap is inherently very useful. What one _can_ do is
+provide the interface of SRFI-146 but not make this implementation a
+Scheme’s default one.] However, all operations that modify the map
+return the map as value, so code can be written as if the map were
+‘linear updating’.footnote:[I have long had an ATS2 implementation of
+hash tries. Once translated from ATS2, the code can be compiled with
+just a C compiler and some special headers. The ATS2 source code
+employs linear types and typechecking-time proofs for safety and
+requires only that stored objects be allocated to fixed locations, in
+the manner of a malloc. Garbage collection is not required, nor is any
+non-C runtime support needed. I may one day add this implementation as
+FFI for compatible Schemes. It is this ATS2 implementation that
+inspired me to implement non-persistent hashmaps. Indeed, to copy the
+ATS2 structure for SRFI-146 will require totally bypassing typesafety.
+It is lack of a linear type system, in which an object may be referred
+to only once at a time, that makes mutability (potentially) hazardous.
+Persistence, on the other hand, almost forces us to use a garbage
+collector. If one had to keep track of and free persistent structure
+versions manually, programming might become overwhelmingly
+burdensome.]
 
 There are interfaces for R⁶RS, R⁷RS, Gambit Scheme (as an R⁷RS
 library), CHICKEN 5 Scheme (using the ‘r7rs’ egg), and CHICKEN 6
 Scheme (as an R⁷RS library).
 
-The following procedures are provided.
+The following procedures are provided. Hash functions passed as
+arguments must return a nonnegative fixnum. Comparator objects passed
+as arguments are those of SRFI-128, and the outputs of their hash
+functions will be truncated to fixnums.
 
 *(make-hashmap _equiv?_ _hashfunc_ _key1_ _value1_ ...)*::
-    Make a new hashmap from a key equivalence
-    procedure,footnote:equiv[The key equivalence procedure takes the
+    Make a new hashmap from a key-equivalence
+    procedure,footnote:equiv[The key-equivalence procedure takes the
     _stored_ key as its _second_ argument.] a key-hash procedure, and
     the given keys and values.
+*(make-hashmap _comparator_ _key1_ _value1_ ...)*:: Make a new hashmap
+    from a comparator and the given keys and values.
 *(alist*+->+*hashmap _equiv?_ _hashfunc_ _alist_)*:: Make a new
-    hashmap from a key equivalence procedure,footnote:equiv[] a
+    hashmap from a key-equivalence procedure,footnote:equiv[] a
     key-hash procedure, and an association list.
+*(alist*+->+*hashmap _comparator_ _alist_)*:: Make a new hashmap from
+    a comparator and an association list.
 *(hashmap*+->+*alist _hashmap_)*:: Return an association list
     containing, in any order, the same key-value pairs as the hashmap.
 *(vector*+->+*hashmap _equiv?_ _hashfunc_ _vector_)*:: Make a new
-    hashmap from a key equivalence procedure,footnote:equiv[] a
+    hashmap from a key-equivalence procedure,footnote:equiv[] a
     key-hash procedure, and a vector of key-value pairs.
+*(vector*+->+*hashmap _comparator_ _vector_)*:: Make a new hashmap
+    from a comparator and a vector of key-value pairs.
 *(hashmap*+->+*vector _hashmap_)*:: Return a vector containing, in any
     order, the same key-value pairs as the hashmap.
 *(hashmap*+->+*generator _hashmap_)*:: Return a thunk that generates,

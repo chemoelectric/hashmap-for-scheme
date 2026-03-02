@@ -41,6 +41,10 @@
                   (fx< fx<?)
                   (fx<= fx<=?)))
 
+  ;; SRFI-128 from Snow.
+  ;; snow-chibi install --impls gambit comparators
+  (import (comparators))
+
   (begin
 
     (define-syntax hash-bits-chunk-max

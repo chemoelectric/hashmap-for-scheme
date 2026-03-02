@@ -5,6 +5,7 @@
         (scheme process-context)
         (scheme write)
         (hashmap))
+(import (srfi 1))
 (import (srfi 42))
 (import (srfi 69))
 

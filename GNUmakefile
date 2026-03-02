@@ -45,14 +45,14 @@ check-chibi-r7rs:
 .PHONY: check-chicken-5-r7rs check-chicken-6-r7rs
 check-chicken-5-r7rs: chicken-5/hashmap.so
 	@( \
-	  export CHICKEN_REPOSITORY_PATH=chicken-5:$(CHICKEN_5_REPOSITORY_PATH); \
+	  export CHICKEN_REPOSITORY_PATH=$${PWD}/chicken-5:$(CHICKEN_5_REPOSITORY_PATH); \
 	  $(CSI_5) -s $(TSTPROG1_R7RS); \
 	  $(CSI_5) -s $(TSTPROG2_R7RS) \
 	)
 
 check-chicken-6-r7rs: chicken-6/hashmap.so
 	@( \
-	  export CHICKEN_REPOSITORY_PATH=chicken-6:$(CHICKEN_6_REPOSITORY_PATH); \
+	  export CHICKEN_REPOSITORY_PATH=$${PWD}/chicken-6:$(CHICKEN_6_REPOSITORY_PATH); \
 	  $(CSI_6) -s $(TSTPROG1_R7RS); \
 	  $(CSI_6) -s $(TSTPROG2_R7RS) \
 	)
@@ -110,7 +110,7 @@ chicken-5/hashmap.egg: GNUmakefile
 	  print " (category data)"; \
 	  print " (license \"MIT\")"; \
 	  print " (author \"Barry Schwartz\")"; \
-	  print " (dependencies r7rs srfi-1 srfi-143)"; \
+	  print " (dependencies r7rs srfi-1 srfi-128 srfi-143)"; \
 	  print " (component-options"; \
 	  print "  (csc-options \"-X\" \"r7rs\" \"-R\" \"r7rs\" \"-O3\""; \
 	  print "               \"-fixnum-arithmetic\""; \
@@ -118,25 +118,30 @@ chicken-5/hashmap.egg: GNUmakefile
 	  print "               ))"; \
 	  print " (components"; \
 	  print "  (extension hashmap.low-level"; \
-	  print "   (source \"hashmap.low-level.scm\"))"; \
+	  print "   (source \"hashmap/low-level.sld\"))"; \
 	  print "  (extension hashmap.define-record-factory"; \
 	  print "   (source \"hashmap.define-record-factory.scm\"))"; \
 	  print "  (extension hashmap.hashmap-structure"; \
-	  print "   (source \"hashmap.hashmap-structure.scm\")"; \
+	  print "   (source \"hashmap/hashmap-structure.sld\")"; \
 	  print "   (component-dependencies hashmap.define-record-factory)"; \
 	  print "   (component-dependencies hashmap.low-level))"; \
 	  print "  (extension hashmap"; \
-	  print "   (source \"hashmap.scm\")"; \
+	  print "   (source \"hashmap.sld\")"; \
 	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
 	}' > $(@)
 
-chicken-5/hashmap.so: chicken-5/hashmap.egg chicken-5/hashmap.scm \
+chicken-5/hashmap.so: chicken-5/hashmap.egg \
 	              chicken-5/hashmap.define-record-factory.scm \
 	              hashmap/hashmap-structure-implementation.scm \
 	              hashmap/low-level-implementation.scm \
 	              hashmap/hashmap-structure.sld \
-	              hashmap/low-level.sld
-	(cd chicken-5; $(CHICKEN_INSTALL_5) -n)
+	              hashmap/low-level.sld hashmap.sld
+	( \
+	  cd chicken-5 && \
+	  ln -sv ../hashmap.sld . && \
+	  $(CHICKEN_INSTALL_5) -n \
+	)
+	rm -f chicken-5/hashmap.sld
 
 clean::
 	-rm -f chicken-5/hashmap.build.sh
@@ -170,7 +175,7 @@ chicken-6/hashmap.egg: GNUmakefile
 	  print " (category data)"; \
 	  print " (license \"MIT\")"; \
 	  print " (author \"Barry Schwartz\")"; \
-	  print " (dependencies srfi-1 srfi-143)"; \
+	  print " (dependencies srfi-1 srfi-128 srfi-143)"; \
 	  print " (component-options"; \
 	  print "  (csc-options \"-O3\""; \
 	  print "               \"-fixnum-arithmetic\""; \
@@ -196,7 +201,12 @@ chicken-6/hashmap.so: chicken-6/hashmap.egg hashmap.sld \
 	              hashmap/define-record-factory.sld \
 	              hashmap/hashmap-structure.sld \
 	              hashmap/low-level.sld
-	(cd chicken-6; $(CHICKEN_INSTALL_6) -n)
+	( \
+	  cd chicken-6 && \
+	  ln -sv ../hashmap.sld . && \
+	  $(CHICKEN_INSTALL_6) -n \
+	)
+	rm -f chicken-6/hashmap.sld
 
 clean::
 	-rm -f chicken-6/hashmap.build.sh

@@ -4,35 +4,57 @@
 
 (define-record-factory <hashmap>
 
-  (constructor> make-hashmap
-                (lambda (construct)
-                  (lambda (equiv? hashfunc . rest*)
-                    (let ((hm (construct
-                               0 equiv?
-                               (hashfunc->popmapfunc hashfunc) #f))
-                          (alst (plist->alist rest*)))
-                      (hashmap-set-from-alist! hm alst)))))
+  (constructor>
+   make-hashmap
+   (lambda (construct)
+     (lambda (arg1 arg2 . rest*)
+       (cond
+         ((comparator? arg1)
+          (unless (comparator-hashable? arg1)
+            (error "expected a hashable comparator" arg1))
+          (let* ((cmp arg1)
+                 (rest* (cons arg2 rest*))
+                 (hm (construct
+                      0 (comparator-equality-predicate cmp)
+                      (comparator->popmapfunc cmp) #f))
+                 (alst (plist->alist rest*)))
+            (hashmap-set-from-alist! hm alst)))
+         (else
+          (let* ((equiv? arg1)
+                 (hashfunc arg2)
+                 (hm (construct 0 equiv?
+                                (hashfunc->popmapfunc hashfunc) #f))
+                 (alst (plist->alist rest*)))
+          (hashmap-set-from-alist! hm alst)))))))
 
-  (constructor> alist->hashmap
-                (lambda (construct)
-                  (lambda (equiv? hashfunc alst)
-                    (let ((hm (construct
-                               0 equiv?
-                               (hashfunc->popmapfunc hashfunc) #f)))
-                      (hashmap-set-from-alist! hm alst)))))
+  (constructor>
+   alist->hashmap
+   (lambda (construct)
+     (case-lambda
+       ((equiv? hashfunc alst)
+        (let ((hm (construct 0 equiv?
+                             (hashfunc->popmapfunc hashfunc) #f)))
+          (hashmap-set-from-alist! hm alst)))
+       ((cmp alst)
+        (unless (and (comparator? cmp)
+                     (comparator-hashable? cmp))
+          (error "expected a hashable comparator" cmp))
+        (let ((hm (construct 0 (comparator-equality-predicate cmp)
+                             (comparator->popmapfunc cmp) #f)))
+          (hashmap-set-from-alist! hm alst))))))
 
-  (constructor> vector->hashmap
-                (lambda (construct)
-                  (lambda (equiv? hashfunc vec)
-                    (let ((hm (construct
-                               0 equiv?
-                               (hashfunc->popmapfunc hashfunc) #f))
-                          (n (vector-length vec)))
-                      (do ((i 0 (fx+ i 1)))
-                          ((fx=? i n))
-                        (let ((pair (vector-ref vec i)))
-                          (hashmap-set! hm (car pair) (cdr pair))))
-                      hm))))
+  (constructor>
+   vector->hashmap
+   (lambda (construct)
+     (case-lambda
+       ((equiv? hashfunc vec)
+        (let ((hm (construct 0 equiv?
+                             (hashfunc->popmapfunc hashfunc) #f)))
+          (fill-from-vector! hm vec)))
+       ((cmp vec)
+        (let ((hm (construct 0 (comparator-equality-predicate cmp)
+                             (comparator->popmapfunc cmp) #f)))
+          (fill-from-vector! hm vec))))))
 
   (predicate> hashmap?)
 
@@ -71,6 +93,20 @@
       (if qr
         (loop (cdr p) q (cons (car p) r) (not qr))
         (loop (cdr p) (cons (car p) q) r (not qr))))))
+
+(define (comparator->popmapfunc cmp)
+  (let ((hash (comparator-hash-function cmp)))
+    (hashfunc->popmapfunc
+     (lambda (obj)
+       (bitwise-and (hash obj) fx-greatest)))))
+
+(define (fill-from-vector! hm vec)
+  (let ((n (vector-length vec)))
+    (do ((i 0 (fx+ i 1)))
+        ((fx=? i n))
+      (let-values (((key value) (car+cdr (vector-ref vec i))))
+        (hashmap-set! hm key value)))
+    hm))
 
 ;;;-------------------------------------------------------------------
 ;;;

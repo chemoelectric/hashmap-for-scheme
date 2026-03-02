@@ -30,10 +30,13 @@
                           for-each map vector-fill!
                           vector->list list->vector)
                   (error r6rs-error))
+          (only (rnrs arithmetic bitwise (6))
+                bitwise-and)
           (rnrs io simple (6))
           (rnrs control (6))
           (rnrs mutable-pairs (6))
           (srfi :1 lists)
+          (srfi :128 comparators)
           (srfi :133 vectors)
           (srfi :143 fixnums)
           (hashmap hashmap-include)
