@@ -25,12 +25,15 @@
           hashmap->generator
           hashmap-fold)
 
-  (import (rename (except (rnrs base (6)) for-each map)
+  (import (rename (except (rnrs base (6))
+                          for-each map vector-fill!
+                          vector->list list->vector)
                   (error r6rs-error))
           (rnrs io simple (6))
           (rnrs control (6))
           (rnrs mutable-pairs (6))
           (srfi :1 lists)
+          (srfi :133 vectors)
           (srfi :143 fixnums)
           (hashmap hashmap-include)
           (hashmap define-record-factory)
