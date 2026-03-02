@@ -467,22 +467,47 @@
 ;;; Walking the trie.
 ;;;
 
-(define (hashmap->alist hm)
+(define (hashmap->vector hm)
   ;;
-  ;; Walk the trie and list the key-value pairs, in any order. (I DO
-  ;; NOT specify that the order must be the same from run to run.)
+  ;; Walk the trie and list the key-value pairs in a vector, in any
+  ;; order. The order need not be the same from run to run of the
+  ;; procedure, although the implementation may be such that this is
+  ;; so.
   ;;
   (if (hashmap-empty? hm)
-    '()
+    (vector)
     (let recurs ((array (hashmap-trie hm)))
-      (concatenate
+      (concatenate-vectors
        (map (lambda (i)
               (let ((entry (get-entry-quickly array i)))
                 (cond
-                  ((pair? entry) (list entry))
-                  ((chain? entry) (chain->alist entry))
+                  ((pair? entry) (vector entry))
+                  ((chain? entry) (list->vector
+                                   (chain->alist entry)))
                   (else (recurs entry)))))
             (iota (array-size array)))))))
+
+(define (concatenate-vectors lst)
+  (let* ((n (fold (lambda (v m) (+ (vector-length v) m)) 0 lst))
+         (vec (make-vector n))
+         (i 0))
+    (do ((p lst (cdr p)))
+        ((null? p))
+      (let* ((v (car p))
+             (m (vector-length v)))
+        (do ((j 0 (fx+ j 1)))
+            ((fx=? j m))
+          (vector-set! vec i (vector-ref v j))
+          (set! i (fx+ i 1)))))
+    vec))
+
+(define (hashmap->alist hm)
+  ;;
+  ;; Walk the trie and list the key-value pairs, in any order. The
+  ;; order need not be the same from run to run of the procedure,
+  ;; although the implementation may be such that this is so.
+  ;;
+  (vector->list (hashmap->vector hm)))
 
 (define (hashmap->generator hm)
   ;;
@@ -537,6 +562,19 @@
       (lambda ()
         (call/cc
          (lambda (ε) (resume-generator ε)))))))
+
+(define (hashmap-fold kons knil hm)
+  ;;
+  ;; Walk the trie in any order (NOT necessarily the same order from
+  ;; run to run). Perform
+  ;;
+  ;;  (kons kv-pairN (...(kons kv-pair1 (kons kv-pair0 knil))...))
+  ;;
+  ;; This takes the place of any number of other operations we could
+  ;; have provided as primitives. For instance, it is simple to
+  ;; implement a ‘count’ or a ‘for-each’ in terms of hashmap-fold.
+  ;;
+  'FIXME)
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:

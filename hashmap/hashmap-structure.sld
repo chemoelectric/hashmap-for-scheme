@@ -20,7 +20,9 @@
           hashmap-delete-from-list!
 
           hashmap->alist
-          hashmap->generator)
+          hashmap->vector
+          hashmap->generator
+          hashmap-fold)
 
   (import (scheme base)
           (scheme write) ;; For debugging.

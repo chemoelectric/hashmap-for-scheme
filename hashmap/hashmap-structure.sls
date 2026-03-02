@@ -21,7 +21,9 @@
           hashmap-delete-from-list!
 
           hashmap->alist
-          hashmap->generator)
+          hashmap->vector
+          hashmap->generator
+          hashmap-fold)
 
   (import (rename (except (rnrs base (6)) for-each map)
                   (error r6rs-error))
