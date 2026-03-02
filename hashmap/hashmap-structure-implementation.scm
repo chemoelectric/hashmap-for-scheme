@@ -507,13 +507,14 @@
   ;; order need not be the same from run to run of the procedure,
   ;; although the implementation may be such that this is so.
   ;;
-  (vector->list (hashmap->vector hm)))
+  (hashmap-fold cons '() hm))
 
 (define (hashmap->generator hm)
   ;;
   ;; Make a generator that walks the trie and returns the key-value
-  ;; pairs, in any order. (I DO NOT specify that the order must be the
-  ;; same from run to run.)
+  ;; pairs, in any order. The order need not be the same from run to
+  ;; run of the procedure, although the implementation may be such
+  ;; that this is so.
   ;;
   ;; When the generator is finished returning key-value pairs, it
   ;; returns an end-of-file object whenever called.
@@ -565,16 +566,30 @@
 
 (define (hashmap-fold kons knil hm)
   ;;
-  ;; Walk the trie in any order (NOT necessarily the same order from
-  ;; run to run). Perform
+  ;; Walk the trie in any order. The order need not be the same from
+  ;; run to run of the procedure, although the implementation may be
+  ;; such that this is so.
   ;;
   ;;  (kons kv-pairN (...(kons kv-pair1 (kons kv-pair0 knil))...))
   ;;
-  ;; This takes the place of any number of other operations we could
-  ;; have provided as primitives. For instance, it is simple to
-  ;; implement a ‘count’ or a ‘for-each’ in terms of hashmap-fold.
+  ;; This makes any number of other operations simpler to implement.
+  ;; For instance it makes a one-liner of hashmap->alist. (Though
+  ;; hashmap->alist also can be one-lined from hashmap->vector.)
   ;;
-  'FIXME)
+  (let ((result knil))
+    (let recurs ((array (hashmap-trie hm)))
+      (for-each
+       (lambda (i)
+         (let ((entry (get-entry-quickly array i)))
+           (cond
+             ((pair? entry)
+              (set! result (kons entry result)))
+             ((chain? entry)
+              (set! result
+                (fold kons result (chain->alist entry))))
+             (else (recurs entry)))))
+       (iota (array-size array))))
+    result))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:
