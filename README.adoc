@@ -20,17 +20,19 @@ Scheme (as an R⁷RS library).
 
 The following procedures are provided.
 
-*(make-hashmap _equiv?_ _hashfunc_ _key1_ _value1_ _key2_ _value2_ ...)*::
+*(make-hashmap _equiv?_ _hashfunc_ _key1_ _value1_ ...)*::
     Make a new hashmap from a key equivalence
     procedure,footnote:equiv[The key equivalence procedure takes the
     _stored_ key as its _second_ argument.] a key-hash procedure, and
     the given keys and values.
 *(alist*+->+*hashmap _equiv?_ _hashfunc_ _alist_)*:: Make a new
-    hashmap from a key equivalence procedure,footnote:equiv[The key
-    equivalence procedure takes the _stored_ key as its _second_
-    argument.] a key-hash procedure, and an association list.
+    hashmap from a key equivalence procedure,footnote:equiv[] a
+    key-hash procedure, and an association list.
 *(hashmap*+->+*alist _hashmap_)*:: Return an association list
     containing, in any order, the same key-value pairs as the hashmap.
+*(vector*+->+*hashmap _equiv?_ _hashfunc_ _vector_)*:: Make a new
+    hashmap from a key equivalence procedure,footnote:equiv[] a
+    key-hash procedure, and a vector of key-value pairs.
 *(hashmap*+->+*vector _hashmap_)*:: Return a vector containing, in any
     order, the same key-value pairs as the hashmap.
 *(hashmap*+->+*generator _hashmap_)*:: Return a thunk that generates,

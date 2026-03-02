@@ -21,6 +21,19 @@
                                (hashfunc->popmapfunc hashfunc) #f)))
                       (hashmap-set-from-alist! hm alst)))))
 
+  (constructor> vector->hashmap
+                (lambda (construct)
+                  (lambda (equiv? hashfunc vec)
+                    (let ((hm (construct
+                               0 equiv?
+                               (hashfunc->popmapfunc hashfunc) #f))
+                          (n (vector-length vec)))
+                      (do ((i 0 (fx+ i 1)))
+                          ((fx=? i n))
+                        (let ((pair (vector-ref vec i)))
+                          (hashmap-set! hm (car pair) (cdr pair))))
+                      hm))))
+
   (predicate> hashmap?)
 
   (getter> 1 hashmap-size)

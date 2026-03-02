@@ -8,6 +8,7 @@
           alist->hashmap
           hashmap->alist
 
+          vector->hashmap
           hashmap->vector
 
           hashmap->generator

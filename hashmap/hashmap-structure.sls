@@ -6,6 +6,7 @@
 
   (export make-hashmap
           alist->hashmap
+          vector->hashmap
           hashmap?
           hashmap-size
           hashmap-equiv?
