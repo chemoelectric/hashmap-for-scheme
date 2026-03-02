@@ -4,10 +4,12 @@
 (define-library (hashmap)
 
   (export make-hashmap
-          alist->hashmap
 
+          alist->hashmap
           hashmap->alist
+
           hashmap->vector
+
           hashmap->generator
           hashmap-fold
 
