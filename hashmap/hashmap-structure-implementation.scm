@@ -520,20 +520,14 @@
   ;; returns an end-of-file object whenever called.
   ;;
   (if (hashmap-empty? hm)
-
     (lambda () (eof-object))
-
-    (let ((trie (hashmap-trie hm)))
-
+    (let ()
       (define suspend '<undefined>)
-
       (define resume-generator
         (lambda (ε)
-
           ;; ε is the point in the program where the generator
           ;; was called.
           (let ((caller-of-generator ε))
-
             (define (suspension-procedure value)
               (call/cc
                (lambda (cc)
@@ -542,24 +536,11 @@
                  ;; Perform the suspension.
                  (set! caller-of-generator
                    (caller-of-generator value)))))
-
             (set! suspend suspension-procedure)
-
-            (let recurs ((array trie))
-              (let ((n (array-size array)))
-                (do ((i 0 (fx+ i 1)))
-                    ((fx=? i n))
-                  (let ((entry (get-entry-quickly array i)))
-                    (cond
-                      ((pair? entry)
-                       (suspend entry))
-                      ((chain? entry)
-                       (for-each suspend (chain->alist entry)))
-                      (else (recurs entry)))))))
-
+            (hashmap-fold (lambda (entry _) (suspend entry) #t)
+                          #t hm)
             (set! resume-generator (lambda () (eof-object)))
             (resume-generator))))
-
       (lambda ()
         (call/cc
          (lambda (ε) (resume-generator ε)))))))
