@@ -123,12 +123,24 @@
 ;;; Insertion into the structure
 ;;;
 
+(define-syntax mode-set
+  (syntax-rules ()
+    ((¶) 0)))
+
+(define-syntax mode-adjoin
+  (syntax-rules ()
+    ((¶) 1)))
+
+(define-syntax mode-replace
+  (syntax-rules ()
+    ((¶) 2)))
+
 (define hashmap-set!
   (case-lambda
     ((hm key value)
      (if (hashmap-empty? hm)
        (make-initial-trie! hm key value)
-       (insert-entry! hm key value)))
+       (insert-entry! (mode-set) hm key value)))
     ((hm . rest*)
      (hashmap-set-from-alist! hm (plist->alist rest*)))))
 
@@ -141,7 +153,7 @@
     (set-hashmap-size! hm 1)
     hm))
 
-(define (insert-entry! hm key value)
+(define (insert-entry! mode hm key value)
   (let ((depth->popmap ((key->depth->popmap hm) key)))
     (let loop ((array (hashmap-trie hm))
                (depth 0)
@@ -151,8 +163,16 @@
       (define (insert-at-chain chain)
         (let* ((equiv? (hashmap-equiv? hm))
                (matches? (lambda (k) (equiv? key k)))
-               (number (add-to-chain! chain matches?
-                                      `(,key . ,value))))
+               (number (cond
+                         ((fx=? mode (mode-set))
+                          (set-in-chain! chain matches?
+                                         `(,key . ,value)))
+                         ((fx=? mode (mode-adjoin))
+                           (adjoin-in-chain! chain matches?
+                                             `(,key . ,value)))
+                         ((fx=? mode (mode-replace))
+                           (replace-in-chain! chain matches?
+                                              `(,key . ,value))))))
           (unless (fxzero? number)
             (set-hashmap-size! hm (fx+ 1 (hashmap-size hm))))
           hm))
@@ -189,13 +209,20 @@
              (define (insert-at-pair)
                (let* ((pair1 (get-entry-quickly array i))
                       (key1 (car pair1)))
-                 (if ((hashmap-equiv? hm) key key1)
-                   (begin ;; Replace the existing pair.
-                     (set-entry! array i `(,key . ,value))
-                     hm)
-                   (grow-trie-at-pair
-                    depth pair1 (lambda (elem)
-                                  (set-entry! array i elem))))))
+                 (cond
+                   (((hashmap-equiv? hm) key key1)
+                    ;; Do not replace if in ‘adjoin’ mode.
+                    (unless (fx=? mode (mode-adjoin))
+                      ;; Replace the existing pair.
+                      (set-entry! array i `(,key . ,value)))
+                    hm)
+                   ((fx=? mode (mode-replace))
+                    ;; Do not insert if in ‘replace’ mode.
+                    hm)
+                   (else
+                    (grow-trie-at-pair
+                     depth pair1 (lambda (elem)
+                                   (set-entry! array i elem)))))))
 
              (define (grow-trie-at-pair deepness pair1 setter!)
                (let* ((key1 (car pair1))
@@ -244,7 +271,9 @@
 
              (cond
                ((not (fx=? popmap new-popmap))
-                (expand-the-current-array!))
+                (if (fx=? mode (mode-replace))
+                  hm ;; No insertion when in ‘replace’ mode.
+                  (expand-the-current-array!)))
                ((pair? (get-entry-quickly array i))
                 (insert-at-pair))
                ((chain? (get-entry-quickly array i))

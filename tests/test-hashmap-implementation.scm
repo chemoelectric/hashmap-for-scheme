@@ -119,6 +119,28 @@
      (let ((g2 (hashmap->generator hm-empty)))
        (test-assert (eof-object? (g2)))))))
 
+(do-ec
+ (:list len (list 1 10 100 1000))
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((pair=? (lambda (a b)
+                  (and (string=? (car a) (car b))
+                       (= (cdr a) (cdr b)))))
+        (alst1 (list-ec (:range i 0 len)
+                        `(,(number->string i 16) . ,i)))
+        (vec2 (list->vector alst1))
+        (hm1 (alist->hashmap string=? my-hash alst1))
+        (hm2 (vector->hashmap string=? my-hash vec2)))
+   (test-assert (lset= pair=?
+                       (hashmap->alist hm1)
+                       (hashmap->alist hm2)))
+   (let ((hm2 (vector->hashmap string=? my-hash
+                               (hashmap->vector hm2))))
+     (test-assert (lset= pair=?
+                         (hashmap->alist hm1)
+                         (hashmap->alist hm2))))))
+
 (display successes)
 (display " successes\n")
 (display failures)

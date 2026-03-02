@@ -107,7 +107,33 @@
        (find (lambda (pair) (matches? (car pair)))
              lst)))))
 
-(define-syntax add-to-chain!
+(define-syntax replace-in-chain!
+  ;;
+  ;; Either replaces an existing entry or makes no change. Returns
+  ;; the size change, which is always 0.
+  ;;
+  (syntax-rules ()
+    ((¶ chain matches? new-pair)
+     (let* ((lst (vector-ref chain 1))
+            (tl (find-tail (lambda (pair) (matches? (car pair)))
+                           lst)))
+       (when tl (set-car! tl new-pair))
+       0))))
+
+(define-syntax adjoin-in-chain!
+  ;;
+  ;; Either inserts a new entry or makes no change. An existing entry
+  ;; matching the key is NOT replaced. Returns the size change: 0 or 1.
+  ;;
+  (syntax-rules ()
+    ((¶ chain matches? new-pair)
+     (let* ((lst (vector-ref chain 1))
+            (tl (find-tail (lambda (pair) (matches? (car pair)))
+                           lst)))
+       (unless tl (vector-set! chain 1 (cons new-pair lst)))
+       (if tl 0 1)))))
+
+(define-syntax set-in-chain!
   ;;
   ;; Either replaces an existing entry or inserts a new entry. Returns
   ;; the size change: 0 or 1.

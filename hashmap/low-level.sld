@@ -21,7 +21,9 @@
           create-chain
           chain->alist
           search-chain
-          add-to-chain!
+          replace-in-chain!
+          adjoin-in-chain!
+          set-in-chain!
           delete-from-chain!
           )
 
