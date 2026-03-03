@@ -103,6 +103,7 @@ EGG_5_VERSION = $(VERSION)
 
 CSI_5 = csi
 CHICKEN_INSTALL_5 = chicken-install
+CHICKEN_UNINSTALL_5 = chicken-uninstall
 
 CHICKEN_5_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_5) -repository)
 
@@ -156,6 +157,18 @@ hashassoc-$(EGG_5_VERSION).chicken-5-egg.tar.xz: clean-chicken-5
 	$(MAKE) $(MAKEFLAGS) chicken-5/hashassoc.egg
 	$(TAR) -cf - chicken-5 | $(XZ) > $@
 
+.PHONY: install-chicken-5-egg uninstall-chicken-5-egg
+install-chicken-5-egg: chicken-5/hashassoc.egg
+	@( \
+	  cd chicken-5 && \
+	  $(CHICKEN_INSTALL_5) -s \
+	)
+uninstall-chicken-5-egg: chicken-5/hashassoc.egg
+	@( \
+	  cd chicken-5 && \
+	  $(CHICKEN_UNINSTALL_5) -force -s hashassoc \
+	)
+
 clean-chicken-5:
 	-rm -Rf chicken-5/hashassoc
 	-rm -f chicken-5/README.adoc
@@ -183,6 +196,7 @@ EGG_6_VERSION = $(VERSION)
 #
 CSI_6 = csi-6
 CHICKEN_INSTALL_6 = chicken-install-6
+CHICKEN_UNINSTALL_6 = chicken-uninstall-6
 
 CHICKEN_6_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_6) -repository)
 
@@ -235,6 +249,18 @@ chicken-6/hashassoc.so: chicken-6/hashassoc.egg
 hashassoc-$(EGG_6_VERSION).chicken-6-egg.tar.xz: clean-chicken-6
 	$(MAKE) $(MAKEFLAGS) chicken-6/hashassoc.egg
 	$(TAR) -cf - chicken-6 | $(XZ) > $@
+
+.PHONY: install-chicken-6-egg uninstall-chicken-6-egg
+install-chicken-6-egg: chicken-6/hashassoc.egg
+	@( \
+	  cd chicken-6 && \
+	  $(CHICKEN_INSTALL_6) -s \
+	)
+uninstall-chicken-6-egg: chicken-6/hashassoc.egg
+	@( \
+	  cd chicken-6 && \
+	  $(CHICKEN_UNINSTALL_6) -force -s hashassoc \
+	)
 
 clean-chicken-6:
 	-rm -Rf chicken-6
