@@ -16,17 +16,17 @@ hash tries. Once translated from ATS2, the code can be compiled with
 just a C compiler and some special headers. The ATS2 source code
 employs linear types and typechecking-time proofs for safety and
 requires only that stored objects be allocated to fixed locations, in
-the manner of a malloc. Garbage collection is not required, nor is any
-non-C runtime support needed. I may one day add this implementation as
-FFI for compatible Schemes. It is this ATS2 implementation that
-inspired me to implement non-persistent hashmaps. Indeed, to copy the
-ATS2 structure for SRFI-146 will require totally bypassing typesafety.
-It is lack of a linear type system, in which an object may be referred
-to only once at a time, that makes mutability (potentially) hazardous.
-Persistence, on the other hand, almost forces us to use a garbage
-collector. If one had to keep track of and free persistent structure
-versions manually, programming might become overwhelmingly
-burdensome.]
+the manner of a malloc. Garbage collection is not required, nor
+reference-counting, nor is any non-C runtime support needed. I may one
+day add this implementation as FFI for compatible Schemes. It is this
+ATS2 implementation that inspired me to implement non-persistent
+hashmaps. Indeed, to copy the ATS2 structure for SRFI-146 will require
+totally bypassing typesafety. It is lack of a linear type system, in
+which an object may be referred to only once at a time, that makes
+mutability (potentially) hazardous. Persistence, on the other hand,
+almost forces us to use a garbage collector. If one had to keep track
+of and free persistent structure versions manually, programming might
+become overwhelmingly burdensome.]
 
 There are interfaces for R⁶RS, R⁷RS, Gambit Scheme (as an R⁷RS
 library), CHICKEN 5 Scheme (using the ‘r7rs’ egg), and CHICKEN 6
