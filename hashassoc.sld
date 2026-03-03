@@ -22,6 +22,10 @@
 
           hashassoc-set!
           hashassoc-set-from-alist!
+          hashassoc-adjoin!
+          hashassoc-adjoin-from-alist!
+          hashassoc-replace!
+          hashassoc-replace-from-alist!
 
           hashassoc-delete!
           hashassoc-delete-from-list!)

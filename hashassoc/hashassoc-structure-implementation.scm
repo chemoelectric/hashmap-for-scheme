@@ -180,6 +180,24 @@
     ((hm . rest*)
      (hashassoc-set-from-alist! hm (plist->alist rest*)))))
 
+(define hashassoc-adjoin!
+  (case-lambda
+    ((hm key value)
+     (if (hashassoc-empty? hm)
+       (make-initial-trie! hm key value)
+       (insert-entry! (mode-adjoin) hm key value)))
+    ((hm . rest*)
+     (hashassoc-adjoin-from-alist! hm (plist->alist rest*)))))
+
+(define hashassoc-replace!
+  (case-lambda
+    ((hm key value)
+     (if (hashassoc-empty? hm)
+       hm
+       (insert-entry! (mode-replace) hm key value)))
+    ((hm . rest*)
+     (hashassoc-set-from-alist! hm (plist->alist rest*)))))
+
 (define (make-initial-trie! hm key value)
   (let* ((depth->popmap ((key->depth->popmap hm) key))
          (pm (depth->popmap 0))
@@ -322,6 +340,20 @@
     (if (null-list? p)
       hm
       (loop (cdr p) (hashassoc-set! hm (caar p) (cdar p))))))
+
+(define (hashassoc-adjoin-from-alist! hm alst)
+  (let loop ((p alst)
+             (hm hm))
+    (if (null-list? p)
+      hm
+      (loop (cdr p) (hashassoc-adjoin! hm (caar p) (cdar p))))))
+
+(define (hashassoc-replace-from-alist! hm alst)
+  (let loop ((p alst)
+             (hm hm))
+    (if (null-list? p)
+      hm
+      (loop (cdr p) (hashassoc-replace! hm (caar p) (cdar p))))))
 
 ;;;-------------------------------------------------------------------
 ;;;

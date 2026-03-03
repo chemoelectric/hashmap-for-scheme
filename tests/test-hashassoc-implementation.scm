@@ -141,6 +141,47 @@
                          (hashassoc->alist hm1)
                          (hashassoc->alist hm2))))))
 
+(do-ec
+ (:list len (list 1 10 100 1000))
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((pair=? (lambda (a b)
+                  (and (string=? (car a) (car b))
+                       (= (cdr a) (cdr b)))))
+        (hm-1 (make-hashassoc string=? my-hash))
+        (hm-2 (make-hashassoc string=? my-hash))
+        (hm-3 (make-hashassoc string=? my-hash))
+        (alst1 (list-ec (:range i 0 len)
+                        `(,(number->string i 16) . ,i)))
+        (alst2 (list-ec (:range i 0 len)
+                        `(,(number->string i 16) . ,(- i)))))
+   (hashassoc-set-from-alist! hm-1 alst1)
+   (hashassoc-adjoin-from-alist! hm-2 alst1)
+   (hashassoc-replace-from-alist! hm-3 alst1)
+   (test-equal len (hashassoc-size hm-1))
+   (test-equal len (hashassoc-size hm-2))
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm-1)
+                       (hashassoc->alist hm-2)))
+   (test-assert (hashassoc-empty? hm-3))
+   (hashassoc-replace-from-alist! hm-2 alst2)
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm-1)
+                       (map (lambda (pair)
+                              `(,(car pair) . ,(- (cdr pair))))
+                            (hashassoc->alist hm-2))))
+   (hashassoc-adjoin-from-alist! hm-2 alst2)
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm-1)
+                       (map (lambda (pair)
+                              `(,(car pair) . ,(- (cdr pair))))
+                            (hashassoc->alist hm-2))))
+   (hashassoc-adjoin-from-alist! hm-3 alst1)
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm-1)
+                       (hashassoc->alist hm-3)))))
+
 (display successes)
 (display " successes\n")
 (display failures)
