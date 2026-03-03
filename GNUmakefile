@@ -103,7 +103,24 @@ CHICKEN_INSTALL_5 = chicken-install
 
 CHICKEN_5_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_5) -repository)
 
-chicken-5/hashmap.egg: GNUmakefile
+chicken-5/%.sld: %.sld
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-5/%.scm: %.scm
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-5/hashmap.egg: GNUmakefile \
+	$(addprefix chicken-5/, \
+		hashmap.sld \
+		hashmap/hashmap-structure.sld \
+		hashmap/low-level.sld \
+		hashmap/hashmap-structure-implementation.scm \
+		hashmap/low-level-implementation.scm)
+	@mkdir -p chicken-5 && \
 	awk 'BEGIN { \
 	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
 	  print " (version \"$(EGG_5_VERSION)\")"; \
@@ -131,19 +148,15 @@ chicken-5/hashmap.egg: GNUmakefile
 	}' > $(@)
 
 chicken-5/hashmap.so: chicken-5/hashmap.egg \
-	              chicken-5/hashmap.define-record-factory.scm \
-	              hashmap/hashmap-structure-implementation.scm \
-	              hashmap/low-level-implementation.scm \
-	              hashmap/hashmap-structure.sld \
-	              hashmap/low-level.sld hashmap.sld
-	( \
+	              chicken-5/hashmap.define-record-factory.scm
+	@( \
 	  cd chicken-5 && \
-	  ln -sv ../hashmap.sld . && \
 	  $(CHICKEN_INSTALL_5) -n \
 	)
-	rm -f chicken-5/hashmap.sld
 
 clean::
+	-rm -Rf chicken-5/hashmap
+	-rm -f chicken-5/hashmap.sld
 	-rm -f chicken-5/hashmap.build.sh
 	-rm -f chicken-5/hashmap.install.sh
 	-rm -f chicken-5/hashmap.egg
@@ -168,7 +181,25 @@ CHICKEN_INSTALL_6 = chicken-install-6
 
 CHICKEN_6_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_6) -repository)
 
-chicken-6/hashmap.egg: GNUmakefile
+chicken-6/%.sld: %.sld
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-6/%.scm: %.scm
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-6/hashmap.egg: GNUmakefile \
+	$(addprefix chicken-6/, \
+		hashmap.sld \
+		hashmap/define-record-factory.sld \
+		hashmap/hashmap-structure.sld \
+		hashmap/low-level.sld \
+		hashmap/hashmap-structure-implementation.scm \
+		hashmap/low-level-implementation.scm)
+	@mkdir -p chicken-6 && \
 	awk 'BEGIN { \
 	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
 	  print " (version \"$(EGG_6_VERSION)\")"; \
@@ -195,26 +226,13 @@ chicken-6/hashmap.egg: GNUmakefile
 	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
 	}' > $(@)
 
-chicken-6/hashmap.so: chicken-6/hashmap.egg hashmap.sld \
-	              hashmap/hashmap-structure-implementation.scm \
-	              hashmap/low-level-implementation.scm \
-	              hashmap/define-record-factory.sld \
-	              hashmap/hashmap-structure.sld \
-	              hashmap/low-level.sld
-	( \
+chicken-6/hashmap.so: chicken-6/hashmap.egg
+	@( \
 	  cd chicken-6 && \
-	  ln -sv ../hashmap.sld . && \
 	  $(CHICKEN_INSTALL_6) -n \
 	)
-	rm -f chicken-6/hashmap.sld
 
 clean::
-	-rm -f chicken-6/hashmap.build.sh
-	-rm -f chicken-6/hashmap.install.sh
-	-rm -f chicken-6/hashmap.egg
-	-rm -f chicken-6/hashmap*.so
-	-rm -f chicken-6/hashmap*.o
-	-rm -f chicken-6/hashmap*.link
-	-rm -f chicken-6/hashmap*.import.*
+	-rm -Rf chicken-6
 
 #---------------------------------------------------------------------
