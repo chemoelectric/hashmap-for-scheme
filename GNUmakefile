@@ -6,6 +6,9 @@
 
 VERSION = 0.0.0
 
+TAR = tar
+XZ = xz
+
 CHEZ = scheme
 CHIBI = chibi-scheme
 GSI = gsi
@@ -103,18 +106,14 @@ CHICKEN_INSTALL_5 = chicken-install
 
 CHICKEN_5_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_5) -repository)
 
-chicken-5/%.sld: %.sld
-	@mkdir -p $(@D) && \
-	rm -f $(@) && \
-	cp $(<) $(@)
-
-chicken-5/%.scm: %.scm
+chicken-5/%: %
 	@mkdir -p $(@D) && \
 	rm -f $(@) && \
 	cp $(<) $(@)
 
 chicken-5/hashassoc.egg: GNUmakefile \
 	$(addprefix chicken-5/, \
+		README.adoc \
 		hashassoc.sld \
 		hashassoc/hashassoc-structure.sld \
 		hashassoc/low-level.sld \
@@ -130,7 +129,6 @@ chicken-5/hashassoc.egg: GNUmakefile \
 	  print " (dependencies r7rs srfi-1 srfi-128 srfi-143)"; \
 	  print " (component-options"; \
 	  print "  (csc-options \"-X\" \"r7rs\" \"-R\" \"r7rs\" \"-O3\""; \
-	  print "               \"-fixnum-arithmetic\""; \
 	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
@@ -148,14 +146,19 @@ chicken-5/hashassoc.egg: GNUmakefile \
 	}' > $(@)
 
 chicken-5/hashassoc.so: chicken-5/hashassoc.egg \
-	              chicken-5/hashassoc.define-record-factory.scm
+	                chicken-5/hashassoc.define-record-factory.scm
 	@( \
 	  cd chicken-5 && \
 	  $(CHICKEN_INSTALL_5) -n \
 	)
 
-clean::
+hashassoc-$(EGG_5_VERSION).chicken-5-egg.tar.xz: clean-chicken-5
+	$(MAKE) $(MAKEFLAGS) chicken-5/hashassoc.egg
+	$(TAR) -cf - chicken-5 | $(XZ) > $@
+
+clean-chicken-5:
 	-rm -Rf chicken-5/hashassoc
+	-rm -f chicken-5/README.adoc
 	-rm -f chicken-5/hashassoc.sld
 	-rm -f chicken-5/hashassoc.build.sh
 	-rm -f chicken-5/hashassoc.install.sh
@@ -164,6 +167,8 @@ clean::
 	-rm -f chicken-5/hashassoc*.o
 	-rm -f chicken-5/hashassoc*.link
 	-rm -f chicken-5/hashassoc*.import.*
+
+clean:: clean-chicken-5
 
 #---------------------------------------------------------------------
 #
@@ -181,18 +186,14 @@ CHICKEN_INSTALL_6 = chicken-install-6
 
 CHICKEN_6_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_6) -repository)
 
-chicken-6/%.sld: %.sld
-	@mkdir -p $(@D) && \
-	rm -f $(@) && \
-	cp $(<) $(@)
-
-chicken-6/%.scm: %.scm
+chicken-6/%: %
 	@mkdir -p $(@D) && \
 	rm -f $(@) && \
 	cp $(<) $(@)
 
 chicken-6/hashassoc.egg: GNUmakefile \
 	$(addprefix chicken-6/, \
+		README.adoc \
 		hashassoc.sld \
 		hashassoc/define-record-factory.sld \
 		hashassoc/hashassoc-structure.sld \
@@ -209,7 +210,6 @@ chicken-6/hashassoc.egg: GNUmakefile \
 	  print " (dependencies srfi-1 srfi-128 srfi-143)"; \
 	  print " (component-options"; \
 	  print "  (csc-options \"-O3\""; \
-	  print "               \"-fixnum-arithmetic\""; \
 	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
@@ -232,7 +232,13 @@ chicken-6/hashassoc.so: chicken-6/hashassoc.egg
 	  $(CHICKEN_INSTALL_6) -n \
 	)
 
-clean::
+hashassoc-$(EGG_6_VERSION).chicken-6-egg.tar.xz: clean-chicken-6
+	$(MAKE) $(MAKEFLAGS) chicken-6/hashassoc.egg
+	$(TAR) -cf - chicken-6 | $(XZ) > $@
+
+clean-chicken-6:
 	-rm -Rf chicken-6
+
+clean:: clean-chicken-6
 
 #---------------------------------------------------------------------

@@ -2,3 +2,4 @@
 ^Akku.*
 .*~
 ^README\.html$
+^.*\.tar\.xz$
