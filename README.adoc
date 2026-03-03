@@ -24,9 +24,9 @@ hashmaps. Indeed, to copy the ATS2 structure for SRFI-146 will require
 totally bypassing typesafety. It is lack of a linear type system, in
 which an object may be referred to only once at a time, that makes
 mutability (potentially) hazardous. Persistence, on the other hand,
-almost forces us to use a garbage collector. If one had to keep track
-of and free persistent structure versions manually, programming might
-become overwhelmingly burdensome.]
+almost forces us to use a garbage collector or reference-counting. If
+one had to keep track of and free persistent structure versions
+manually, programming might become overwhelmingly burdensome.]
 
 There are interfaces for R⁶RS, R⁷RS, Gambit Scheme (as an R⁷RS
 library), CHICKEN 5 Scheme (using the ‘r7rs’ egg), and CHICKEN 6
