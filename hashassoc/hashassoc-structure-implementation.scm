@@ -163,7 +163,7 @@
   (syntax-rules ()
     ((¶) 0)))
 
-(define-syntax mode-adjoin
+(define-syntax mode-insert
   (syntax-rules ()
     ((¶) 1)))
 
@@ -180,14 +180,14 @@
     ((hm . rest*)
      (hashassoc-set-from-alist! hm (plist->alist rest*)))))
 
-(define hashassoc-adjoin!
+(define hashassoc-insert!
   (case-lambda
     ((hm key value)
      (if (hashassoc-empty? hm)
        (make-initial-trie! hm key value)
-       (insert-entry! (mode-adjoin) hm key value)))
+       (insert-entry! (mode-insert) hm key value)))
     ((hm . rest*)
-     (hashassoc-adjoin-from-alist! hm (plist->alist rest*)))))
+     (hashassoc-insert-from-alist! hm (plist->alist rest*)))))
 
 (define hashassoc-replace!
   (case-lambda
@@ -221,8 +221,8 @@
                          ((fx=? mode (mode-set))
                           (set-in-chain! chain matches?
                                          `(,key . ,value)))
-                         ((fx=? mode (mode-adjoin))
-                           (adjoin-in-chain! chain matches?
+                         ((fx=? mode (mode-insert))
+                           (insert-in-chain! chain matches?
                                              `(,key . ,value)))
                          ((fx=? mode (mode-replace))
                            (replace-in-chain! chain matches?
@@ -265,8 +265,8 @@
                       (key1 (car pair1)))
                  (cond
                    (((hashassoc-equiv? hm) key key1)
-                    ;; Do not replace if in ‘adjoin’ mode.
-                    (unless (fx=? mode (mode-adjoin))
+                    ;; Do not replace if in ‘insert’ mode.
+                    (unless (fx=? mode (mode-insert))
                       ;; Replace the existing pair.
                       (set-entry! array i `(,key . ,value)))
                     hm)
@@ -341,12 +341,12 @@
       hm
       (loop (cdr p) (hashassoc-set! hm (caar p) (cdar p))))))
 
-(define (hashassoc-adjoin-from-alist! hm alst)
+(define (hashassoc-insert-from-alist! hm alst)
   (let loop ((p alst)
              (hm hm))
     (if (null-list? p)
       hm
-      (loop (cdr p) (hashassoc-adjoin! hm (caar p) (cdar p))))))
+      (loop (cdr p) (hashassoc-insert! hm (caar p) (cdar p))))))
 
 (define (hashassoc-replace-from-alist! hm alst)
   (let loop ((p alst)

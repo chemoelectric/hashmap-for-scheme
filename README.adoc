@@ -83,6 +83,20 @@ to fixnums.
 *(hashassoc-set-from-alist! _hashmap_ _alist_)*:: Either insert or
      replace hashmap entries, taking the new key-value pairs from an
      association list.
+*(hashassoc-insert! _hashmap_ _key1_ _value1_ ...)*:: Insert, but do
+     not replace, hashmap entries.footnote:[In an allusion to set
+     theory, SRFI-146 calls this operation ‘_adjoining_’. I am sick of
+     the abuse of set theory to make a vast meaninglessness of
+     everything mathematical or computerized. The name chosen here
+     tells you what is done.]
+*(hashassoc-insert-from-alist! _hashmap_ _alist_)*:: Insert, but do
+     not replace, hashmap entries, taking the new key-value pairs from
+     an association list.
+*(hashassoc-replace! _hashmap_ _key1_ _value1_ ...)*:: Replace, but do
+     not insert, hashmap entries.
+*(hashassoc-replace-from-alist! _hashmap_ _alist_)*:: Replace, but do
+     not insert, hashmap entries, taking the new key-value pairs from
+     an association list.
 *(hashassoc-delete! _hashmap_ _key1_ ...)*:: For every given key, if
      it is contained in the hashmap, delete the corresponding
      key-value pair.

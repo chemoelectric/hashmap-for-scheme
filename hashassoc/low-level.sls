@@ -23,7 +23,7 @@
           chain->alist
           search-chain
           replace-in-chain!
-          adjoin-in-chain!
+          insert-in-chain!
           set-in-chain!
           delete-from-chain!
           )

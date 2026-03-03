@@ -120,7 +120,7 @@
        (when tl (set-car! tl new-pair))
        0))))
 
-(define-syntax adjoin-in-chain!
+(define-syntax insert-in-chain!
   ;;
   ;; Either inserts a new entry or makes no change. An existing entry
   ;; matching the key is NOT replaced. Returns the size change: 0 or 1.
