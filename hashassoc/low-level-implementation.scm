@@ -97,6 +97,10 @@
   (syntax-rules ()
     ((¶ chain) (vector-ref chain 1))))
 
+(define-syntax alist->chain
+  (syntax-rules ()
+    ((¶ alst) (vector #f alst))))
+
 (define-syntax search-chain
   ;;
   ;; Return either #f or the key-value cons-pair that matches.

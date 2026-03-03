@@ -28,7 +28,9 @@
           hashassoc->alist
           hashassoc->vector
           hashassoc->generator
-          hashassoc-fold)
+          hashassoc-fold
+
+          hashassoc-copy)
 
   (import (rename (except (rnrs base (6))
                           for-each map vector-fill!

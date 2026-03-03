@@ -27,7 +27,9 @@
           hashassoc->alist
           hashassoc->vector
           hashassoc->generator
-          hashassoc-fold)
+          hashassoc-fold
+
+          hashassoc-copy)
 
   (import (scheme base)
           (scheme write) ;; For debugging.

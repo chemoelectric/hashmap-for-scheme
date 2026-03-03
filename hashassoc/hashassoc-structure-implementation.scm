@@ -4,6 +4,8 @@
 
 (define-record-factory <hashassoc>
 
+  (constructor> construct-hashassoc)
+
   (constructor>
    make-hashassoc
    (lambda (construct)
@@ -681,6 +683,52 @@
              (else (recurs entry)))))
        (iota (array-size array))))
     result))
+
+;;;-------------------------------------------------------------------
+;;;
+;;; Copying the trie.
+;;;
+
+(define (hashassoc-copy hm)
+  ;;
+  ;; Copy the structure of the hashmap, but not the keys and values.
+  ;; Even new key-value pairs are created. Copy merely the references
+  ;; to the keys and values and references to the hashassoc-equiv? and
+  ;; key->depth->popmap procedures.
+  ;;
+  ;; (We would not know how to copy keys and values, anyway, unless we
+  ;; took as arguments procedures to do the copying. I mention copying
+  ;; keys and values because it is necessary if they [and not merely
+  ;; the trie] are of linear types. I was inspired to write MUTABLE
+  ;; hashmaps because I have an ATS implementation of hashmaps that is
+  ;; linear-typed and mutable.)
+  ;;
+  (let ((sz (hashassoc-size hm)))
+    (construct-hashassoc sz (hashassoc-equiv? hm)
+                         (key->depth->popmap hm)
+                         (if (fxzero? sz)
+                           #f (copy-array (hashassoc-trie hm))))))
+
+(define (copy-array array)
+  (let* ((n (array-size array))
+         (n+1 (fx+ n 1))
+         (array% (make-vector n+1)))
+    (set-population-map! array% (get-population-map array))
+    (do ((i 0 (fx+ i 1)))
+        ((fx=? i n))
+      (let ((entry (get-entry-quickly array i)))
+        (cond
+          ((pair? entry)
+           (set-entry! array% i `(,(car entry) . ,(cdr entry))))
+          ((chain? entry)
+           (set-entry! array% i (copy-chain entry)))
+          (else
+           (set-entry! array% i (copy-array entry))))))
+    array%))
+
+(define (copy-chain chain)
+  (alist->chain (map (lambda (pair) `(,(car pair) . ,(cdr pair)))
+                     (chain->alist chain))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:

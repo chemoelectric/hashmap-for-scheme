@@ -11,6 +11,8 @@
           vector->hashassoc
           hashassoc->vector
 
+          hashassoc-copy
+
           hashassoc->generator
           hashassoc-fold
 

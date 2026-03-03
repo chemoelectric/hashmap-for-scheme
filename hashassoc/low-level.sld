@@ -20,6 +20,7 @@
           chain?
           create-chain
           chain->alist
+          alist->chain
           search-chain
           replace-in-chain!
           insert-in-chain!

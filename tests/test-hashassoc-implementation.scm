@@ -182,6 +182,23 @@
                        (hashassoc->alist hm-1)
                        (hashassoc->alist hm-3)))))
 
+(do-ec
+ (:list len (list 1 10 100 1000))
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((pair=? (lambda (a b)
+                  (and (string=? (car a) (car b))
+                       (= (cdr a) (cdr b)))))
+        (alst1 (list-ec (:range i 0 len)
+                        `(,(number->string i 16) . ,i)))
+        (hm1 (alist->hashassoc string=? my-hash alst1))
+        (hm2 (hashassoc-copy hm1)))
+   (hashassoc-delete-from-list! hm1 (map car alst1))
+   (test-equal 0 (hashassoc-size hm1))
+   (test-equal len (hashassoc-size hm2))
+   (test-assert (lset= pair=? alst1 (hashassoc->alist hm2)))))
+
 (display successes)
 (display " successes\n")
 (display failures)

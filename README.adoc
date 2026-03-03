@@ -60,6 +60,9 @@ to fixnums.
     from a comparator and a vector of key-value pairs.
 *(hashassoc*+->+*vector _hashmap_)*:: Return a vector containing, in
     any order, the same key-value pairs as the hashmap.
+*(hashassoc-copy _hashmap_)*:: Make a structural copy of a hashmap.
+     The copy is _complete_: even the pairs are replaced. The keys and
+     values are the only objects not copied.
 *(hashassoc*+->+*generator _hashmap_)*:: Return a thunk that
      generates, in any order, the key-value pairs that are contained
      in the hashmap. Once all the key-value pairs have been produced,
