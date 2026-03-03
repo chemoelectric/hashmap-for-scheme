@@ -2,7 +2,7 @@
 ;; SPDX-License-Identifier: MIT
 #!r6rs
 
-(library (hashmap low-level)
+(library (hashassoc low-level)
 
   (export make-array-node
           get-population-map
@@ -34,7 +34,7 @@
           (rnrs mutable-pairs (6))
           (only (srfi :1 lists) find find-tail drop-right!)
           (srfi :143 fixnums)
-          (hashmap hashmap-include))
+          (hashassoc hashassoc-include))
 
   (define-syntax hash-bits-chunk-max
     ;;
@@ -55,7 +55,7 @@
     (syntax-rules ()
       ((¶) 60)))
 
-  (include "hashmap/low-level-implementation.scm")
+  (include "hashassoc/low-level-implementation.scm")
 
   )
 

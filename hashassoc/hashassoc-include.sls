@@ -2,7 +2,7 @@
 ;; SPDX-License-Identifier: MIT
 #!r6rs
 
-(library (hashmap hashmap-include)
+(library (hashassoc hashassoc-include)
 
   (export include)
 

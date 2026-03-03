@@ -10,10 +10,10 @@
         (rnrs r5rs (6))
         (srfi :1 lists)
         (srfi :143 fixnums)
-        (hashmap low-level)
-        (hashmap hashmap-include))
+        (hashassoc low-level)
+        (hashassoc hashassoc-include))
 
-(include "tests/test-hashmap-low-level-implementation.scm")
+(include "tests/test-hashassoc-low-level-implementation.scm")
 
 ;;; local variables:
 ;;; mode: scheme

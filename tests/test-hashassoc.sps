@@ -11,10 +11,10 @@
         (srfi :1 lists)
         (srfi :42 eager-comprehensions)
         (srfi :128 comparators)
-        (hashmap hashmap-include)
-        (hashmap))
+        (hashassoc hashassoc-include)
+        (hashassoc))
 
-(include "tests/test-hashmap-implementation.scm")
+(include "tests/test-hashassoc-implementation.scm")
 
 ;;; local variables:
 ;;; mode: scheme

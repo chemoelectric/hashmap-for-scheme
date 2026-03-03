@@ -1,30 +1,30 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
-(define-library (hashmap)
+(define-library (hashassoc)
 
-  (export make-hashmap
+  (export make-hashassoc
           
-          alist->hashmap
-          hashmap->alist
+          alist->hashassoc
+          hashassoc->alist
 
-          vector->hashmap
-          hashmap->vector
+          vector->hashassoc
+          hashassoc->vector
 
-          hashmap->generator
-          hashmap-fold
+          hashassoc->generator
+          hashassoc-fold
 
-          hashmap?
+          hashassoc?
 
-          hashmap-size
-          hashmap-empty?
-          hashmap-ref
+          hashassoc-size
+          hashassoc-empty?
+          hashassoc-ref
 
-          hashmap-set!
-          hashmap-set-from-alist!
+          hashassoc-set!
+          hashassoc-set-from-alist!
 
-          hashmap-delete!
-          hashmap-delete-from-list!)
+          hashassoc-delete!
+          hashassoc-delete-from-list!)
 
   (import (except (scheme base)
                   assv assq assoc
@@ -147,8 +147,8 @@
                  ...))))))))
     
     (define fxbit-field bit-field)
-    (include "hashmap/low-level-implementation.scm")
-    (include "hashmap/hashmap-structure-implementation.scm")
+    (include "hashassoc/low-level-implementation.scm")
+    (include "hashassoc/hashassoc-structure-implementation.scm")
 
     ))
 

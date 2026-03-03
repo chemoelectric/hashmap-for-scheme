@@ -1,35 +1,35 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
-(define-library (hashmap hashmap-structure)
+(define-library (hashassoc hashassoc-structure)
 
-  (export make-hashmap
-          alist->hashmap
-          vector->hashmap
-          hashmap?
-          hashmap-size
-          hashmap-equiv?
+  (export make-hashassoc
+          alist->hashassoc
+          vector->hashassoc
+          hashassoc?
+          hashassoc-size
+          hashassoc-equiv?
           key->depth->popmap
-          hashmap-trie
+          hashassoc-trie
 
-          hashmap-empty?
-          hashmap-ref
-          hashmap-set!
-          hashmap-set-from-alist!
+          hashassoc-empty?
+          hashassoc-ref
+          hashassoc-set!
+          hashassoc-set-from-alist!
 
-          hashmap-delete!
-          hashmap-delete-from-list!
+          hashassoc-delete!
+          hashassoc-delete-from-list!
 
-          hashmap->alist
-          hashmap->vector
-          hashmap->generator
-          hashmap-fold)
+          hashassoc->alist
+          hashassoc->vector
+          hashassoc->generator
+          hashassoc-fold)
 
   (import (scheme base)
           (scheme write) ;; For debugging.
           (scheme case-lambda))
-  (import (hashmap define-record-factory)
-          (hashmap low-level))
+  (import (hashassoc define-record-factory)
+          (hashassoc low-level))
   (cond-expand
     (chicken-5 (import (srfi 1)))
     ((library (scheme list)) (import (scheme list)))
@@ -53,7 +53,7 @@
 
   (begin
 
-    (include "hashmap/hashmap-structure-implementation.scm")
+    (include "hashassoc/hashassoc-structure-implementation.scm")
 
     ))
 

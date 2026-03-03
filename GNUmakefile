@@ -23,11 +23,11 @@ check-loko-r7rs = $(call check,$(LOKO) -std=r7rs --script,LOKO_LIBRARY_PATH,$(1)
 check-sagittarius-r6rs = $(call check,$(SAGITTARIUS) -d -r6 --,SAGITTARIUS_LOADPATH,$(1))
 check-sagittarius-r7rs = $(call check,$(SAGITTARIUS) -d -r7 --,SAGITTARIUS_LOADPATH,$(1))
 
-TSTPROG1_R6RS = tests/test-hashmap-low-level.sps
-TSTPROG2_R6RS = tests/test-hashmap.sps
+TSTPROG1_R6RS = tests/test-hashassoc-low-level.sps
+TSTPROG2_R6RS = tests/test-hashassoc.sps
 
-TSTPROG1_R7RS = tests/test-hashmap-low-level.scm
-TSTPROG2_R7RS = tests/test-hashmap.scm
+TSTPROG1_R7RS = tests/test-hashassoc-low-level.scm
+TSTPROG2_R7RS = tests/test-hashassoc.scm
 
 # To test with Chez Scheme, one must install SRFI software, such as
 # chez-srfi.
@@ -43,14 +43,14 @@ check-chibi-r7rs:
 	$(call check-chibi-r7rs, $(TSTPROG1_R7RS) $(TSTPROG2_R7RS))
 
 .PHONY: check-chicken-5-r7rs check-chicken-6-r7rs
-check-chicken-5-r7rs: chicken-5/hashmap.so
+check-chicken-5-r7rs: chicken-5/hashassoc.so
 	@( \
 	  export CHICKEN_REPOSITORY_PATH=$${PWD}/chicken-5:$(CHICKEN_5_REPOSITORY_PATH); \
 	  $(CSI_5) -s $(TSTPROG1_R7RS); \
 	  $(CSI_5) -s $(TSTPROG2_R7RS) \
 	)
 
-check-chicken-6-r7rs: chicken-6/hashmap.so
+check-chicken-6-r7rs: chicken-6/hashassoc.so
 	@( \
 	  export CHICKEN_REPOSITORY_PATH=$${PWD}/chicken-6:$(CHICKEN_6_REPOSITORY_PATH); \
 	  $(CSI_6) -s $(TSTPROG1_R7RS); \
@@ -67,7 +67,7 @@ check-chicken-6-r7rs: chicken-6/hashmap.so
 check-gambit-gsi-r7rs:
 	@( \
 	  cd gambit && \
-	  $(GSI) -:r7rs,search=. ../tests/test-hashmap-gambit-gsi.scm \
+	  $(GSI) -:r7rs,search=. ../tests/test-hashassoc-gambit-gsi.scm \
 	)
 
 .PHONY: check-gauche-r7rs
@@ -113,13 +113,13 @@ chicken-5/%.scm: %.scm
 	rm -f $(@) && \
 	cp $(<) $(@)
 
-chicken-5/hashmap.egg: GNUmakefile \
+chicken-5/hashassoc.egg: GNUmakefile \
 	$(addprefix chicken-5/, \
-		hashmap.sld \
-		hashmap/hashmap-structure.sld \
-		hashmap/low-level.sld \
-		hashmap/hashmap-structure-implementation.scm \
-		hashmap/low-level-implementation.scm)
+		hashassoc.sld \
+		hashassoc/hashassoc-structure.sld \
+		hashassoc/low-level.sld \
+		hashassoc/hashassoc-structure-implementation.scm \
+		hashassoc/low-level-implementation.scm)
 	@mkdir -p chicken-5 && \
 	awk 'BEGIN { \
 	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
@@ -134,36 +134,36 @@ chicken-5/hashmap.egg: GNUmakefile \
 	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
-	  print "  (extension hashmap.low-level"; \
-	  print "   (source \"hashmap/low-level.sld\"))"; \
-	  print "  (extension hashmap.define-record-factory"; \
-	  print "   (source \"hashmap.define-record-factory.scm\"))"; \
-	  print "  (extension hashmap.hashmap-structure"; \
-	  print "   (source \"hashmap/hashmap-structure.sld\")"; \
-	  print "   (component-dependencies hashmap.define-record-factory)"; \
-	  print "   (component-dependencies hashmap.low-level))"; \
-	  print "  (extension hashmap"; \
-	  print "   (source \"hashmap.sld\")"; \
-	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
+	  print "  (extension hashassoc.low-level"; \
+	  print "   (source \"hashassoc/low-level.sld\"))"; \
+	  print "  (extension hashassoc.define-record-factory"; \
+	  print "   (source \"hashassoc.define-record-factory.scm\"))"; \
+	  print "  (extension hashassoc.hashassoc-structure"; \
+	  print "   (source \"hashassoc/hashassoc-structure.sld\")"; \
+	  print "   (component-dependencies hashassoc.define-record-factory)"; \
+	  print "   (component-dependencies hashassoc.low-level))"; \
+	  print "  (extension hashassoc"; \
+	  print "   (source \"hashassoc.sld\")"; \
+	  print "   (component-dependencies hashassoc.hashassoc-structure))))"; \
 	}' > $(@)
 
-chicken-5/hashmap.so: chicken-5/hashmap.egg \
-	              chicken-5/hashmap.define-record-factory.scm
+chicken-5/hashassoc.so: chicken-5/hashassoc.egg \
+	              chicken-5/hashassoc.define-record-factory.scm
 	@( \
 	  cd chicken-5 && \
 	  $(CHICKEN_INSTALL_5) -n \
 	)
 
 clean::
-	-rm -Rf chicken-5/hashmap
-	-rm -f chicken-5/hashmap.sld
-	-rm -f chicken-5/hashmap.build.sh
-	-rm -f chicken-5/hashmap.install.sh
-	-rm -f chicken-5/hashmap.egg
-	-rm -f chicken-5/hashmap*.so
-	-rm -f chicken-5/hashmap*.o
-	-rm -f chicken-5/hashmap*.link
-	-rm -f chicken-5/hashmap*.import.*
+	-rm -Rf chicken-5/hashassoc
+	-rm -f chicken-5/hashassoc.sld
+	-rm -f chicken-5/hashassoc.build.sh
+	-rm -f chicken-5/hashassoc.install.sh
+	-rm -f chicken-5/hashassoc.egg
+	-rm -f chicken-5/hashassoc*.so
+	-rm -f chicken-5/hashassoc*.o
+	-rm -f chicken-5/hashassoc*.link
+	-rm -f chicken-5/hashassoc*.import.*
 
 #---------------------------------------------------------------------
 #
@@ -191,14 +191,14 @@ chicken-6/%.scm: %.scm
 	rm -f $(@) && \
 	cp $(<) $(@)
 
-chicken-6/hashmap.egg: GNUmakefile \
+chicken-6/hashassoc.egg: GNUmakefile \
 	$(addprefix chicken-6/, \
-		hashmap.sld \
-		hashmap/define-record-factory.sld \
-		hashmap/hashmap-structure.sld \
-		hashmap/low-level.sld \
-		hashmap/hashmap-structure-implementation.scm \
-		hashmap/low-level-implementation.scm)
+		hashassoc.sld \
+		hashassoc/define-record-factory.sld \
+		hashassoc/hashassoc-structure.sld \
+		hashassoc/low-level.sld \
+		hashassoc/hashassoc-structure-implementation.scm \
+		hashassoc/low-level-implementation.scm)
 	@mkdir -p chicken-6 && \
 	awk 'BEGIN { \
 	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
@@ -213,20 +213,20 @@ chicken-6/hashmap.egg: GNUmakefile \
 	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
-	  print "  (extension hashmap.low-level"; \
-	  print "   (source \"hashmap/low-level.sld\"))"; \
-	  print "  (extension hashmap.define-record-factory"; \
-	  print "   (source \"hashmap/define-record-factory.sld\"))"; \
-	  print "  (extension hashmap.hashmap-structure"; \
-	  print "   (source \"hashmap/hashmap-structure.sld\")"; \
-	  print "   (component-dependencies hashmap.define-record-factory)"; \
-	  print "   (component-dependencies hashmap.low-level))"; \
-	  print "  (extension hashmap"; \
-	  print "   (source \"hashmap.sld\")"; \
-	  print "   (component-dependencies hashmap.hashmap-structure))))"; \
+	  print "  (extension hashassoc.low-level"; \
+	  print "   (source \"hashassoc/low-level.sld\"))"; \
+	  print "  (extension hashassoc.define-record-factory"; \
+	  print "   (source \"hashassoc/define-record-factory.sld\"))"; \
+	  print "  (extension hashassoc.hashassoc-structure"; \
+	  print "   (source \"hashassoc/hashassoc-structure.sld\")"; \
+	  print "   (component-dependencies hashassoc.define-record-factory)"; \
+	  print "   (component-dependencies hashassoc.low-level))"; \
+	  print "  (extension hashassoc"; \
+	  print "   (source \"hashassoc.sld\")"; \
+	  print "   (component-dependencies hashassoc.hashassoc-structure))))"; \
 	}' > $(@)
 
-chicken-6/hashmap.so: chicken-6/hashmap.egg
+chicken-6/hashassoc.so: chicken-6/hashassoc.egg
 	@( \
 	  cd chicken-6 && \
 	  $(CHICKEN_INSTALL_6) -n \

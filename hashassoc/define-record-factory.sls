@@ -2,7 +2,7 @@
 ;; SPDX-License-Identifier: MIT
 #!r6rs
 
-(library (hashmap define-record-factory)
+(library (hashassoc define-record-factory)
 
   (export define-record-factory)
 

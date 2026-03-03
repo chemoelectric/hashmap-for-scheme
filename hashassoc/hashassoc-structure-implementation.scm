@@ -2,10 +2,10 @@
 ;; SPDX-License-Identifier: MIT
 ;;;-------------------------------------------------------------------
 
-(define-record-factory <hashmap>
+(define-record-factory <hashassoc>
 
   (constructor>
-   make-hashmap
+   make-hashassoc
    (lambda (construct)
      (lambda (arg1 arg2 . rest*)
        (cond
@@ -18,33 +18,33 @@
                       0 (comparator-equality-predicate cmp)
                       (comparator->popmapfunc cmp) #f))
                  (alst (plist->alist rest*)))
-            (hashmap-set-from-alist! hm alst)))
+            (hashassoc-set-from-alist! hm alst)))
          (else
           (let* ((equiv? arg1)
                  (hashfunc arg2)
                  (hm (construct 0 equiv?
                                 (hashfunc->popmapfunc hashfunc) #f))
                  (alst (plist->alist rest*)))
-          (hashmap-set-from-alist! hm alst)))))))
+          (hashassoc-set-from-alist! hm alst)))))))
 
   (constructor>
-   alist->hashmap
+   alist->hashassoc
    (lambda (construct)
      (case-lambda
        ((equiv? hashfunc alst)
         (let ((hm (construct 0 equiv?
                              (hashfunc->popmapfunc hashfunc) #f)))
-          (hashmap-set-from-alist! hm alst)))
+          (hashassoc-set-from-alist! hm alst)))
        ((cmp alst)
         (unless (and (comparator? cmp)
                      (comparator-hashable? cmp))
           (error "expected a hashable comparator" cmp))
         (let ((hm (construct 0 (comparator-equality-predicate cmp)
                              (comparator->popmapfunc cmp) #f)))
-          (hashmap-set-from-alist! hm alst))))))
+          (hashassoc-set-from-alist! hm alst))))))
 
   (constructor>
-   vector->hashmap
+   vector->hashassoc
    (lambda (construct)
      (case-lambda
        ((equiv? hashfunc vec)
@@ -56,16 +56,16 @@
                              (comparator->popmapfunc cmp) #f)))
           (fill-from-vector! hm vec))))))
 
-  (predicate> hashmap?)
+  (predicate> hashassoc?)
 
-  (getter> 1 hashmap-size)
-  (setter> 1 set-hashmap-size!)
+  (getter> 1 hashassoc-size)
+  (setter> 1 set-hashassoc-size!)
 
-  (getter> 2 hashmap-equiv?)
+  (getter> 2 hashassoc-equiv?)
   (getter> 3 key->depth->popmap)
 
-  (getter> 4 hashmap-trie)
-  (setter> 4 set-hashmap-trie!))
+  (getter> 4 hashassoc-trie)
+  (setter> 4 set-hashassoc-trie!))
 
 ;;;-------------------------------------------------------------------
 
@@ -105,7 +105,7 @@
     (do ((i 0 (fx+ i 1)))
         ((fx=? i n))
       (let-values (((key value) (car+cdr (vector-ref vec i))))
-        (hashmap-set! hm key value)))
+        (hashassoc-set! hm key value)))
     hm))
 
 ;;;-------------------------------------------------------------------
@@ -113,10 +113,10 @@
 ;;; Retrieval from the structure.
 ;;;
 
-(define (hashmap-empty? hm)
-  (fxzero? (hashmap-size hm)))
+(define (hashassoc-empty? hm)
+  (fxzero? (hashassoc-size hm)))
 
-(define (hashmap-ref hm key)
+(define (hashassoc-ref hm key)
   ;;
   ;; Returns either #f or a (key . value) cons-pair. The ‘key’ part of
   ;; the pair will be the key that was used to store the value, NOT
@@ -127,10 +127,10 @@
   ;; needed in SRFI-125. (A reasonable alternative would be to have a
   ;; special unique object for ‘no result’.)
   ;;
-  (if (hashmap-empty? hm)
+  (if (hashassoc-empty? hm)
     #f
     (let ((depth->popmap ((key->depth->popmap hm) key)))
-      (let loop ((array (hashmap-trie hm))
+      (let loop ((array (hashassoc-trie hm))
                  (depth 0)
                  (pm (depth->popmap 0)))
         (if (hash-bits-exhausted? pm)
@@ -142,11 +142,11 @@
             (cond
               ((not entry) #f)
               ((pair? entry)
-               (let ((equiv? (hashmap-equiv? hm))
+               (let ((equiv? (hashassoc-equiv? hm))
                      (k (car entry)))
                  (if (equiv? key k) entry #f)))
               ((chain? entry)
-               (let* ((equiv? (hashmap-equiv? hm))
+               (let* ((equiv? (hashassoc-equiv? hm))
                       (matches? (lambda (k) (equiv? key k))))
                  (search-chain entry matches?)))
               (else
@@ -171,33 +171,33 @@
   (syntax-rules ()
     ((¶) 2)))
 
-(define hashmap-set!
+(define hashassoc-set!
   (case-lambda
     ((hm key value)
-     (if (hashmap-empty? hm)
+     (if (hashassoc-empty? hm)
        (make-initial-trie! hm key value)
        (insert-entry! (mode-set) hm key value)))
     ((hm . rest*)
-     (hashmap-set-from-alist! hm (plist->alist rest*)))))
+     (hashassoc-set-from-alist! hm (plist->alist rest*)))))
 
 (define (make-initial-trie! hm key value)
   (let* ((depth->popmap ((key->depth->popmap hm) key))
          (pm (depth->popmap 0))
          (leaf `(,key . ,value))
          (array (make-array-node pm leaf)))
-    (set-hashmap-trie! hm array)
-    (set-hashmap-size! hm 1)
+    (set-hashassoc-trie! hm array)
+    (set-hashassoc-size! hm 1)
     hm))
 
 (define (insert-entry! mode hm key value)
   (let ((depth->popmap ((key->depth->popmap hm) key)))
-    (let loop ((array (hashmap-trie hm))
+    (let loop ((array (hashassoc-trie hm))
                (depth 0)
                (setter! (lambda (trie)
-                          (set-hashmap-trie! hm trie))))
+                          (set-hashassoc-trie! hm trie))))
 
       (define (insert-at-chain chain)
-        (let* ((equiv? (hashmap-equiv? hm))
+        (let* ((equiv? (hashassoc-equiv? hm))
                (matches? (lambda (k) (equiv? key k)))
                (number (cond
                          ((fx=? mode (mode-set))
@@ -210,7 +210,7 @@
                            (replace-in-chain! chain matches?
                                               `(,key . ,value))))))
           (unless (fxzero? number)
-            (set-hashmap-size! hm (fx+ 1 (hashmap-size hm))))
+            (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm))))
           hm))
 
       (let ((pm (depth->popmap depth)))
@@ -239,14 +239,14 @@
                      (set-entry! array1 (fx+ j 1)
                                  (get-entry-quickly array j))))
                  (setter! array1)
-                 (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
+                 (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm)))
                  hm))
 
              (define (insert-at-pair)
                (let* ((pair1 (get-entry-quickly array i))
                       (key1 (car pair1)))
                  (cond
-                   (((hashmap-equiv? hm) key key1)
+                   (((hashassoc-equiv? hm) key key1)
                     ;; Do not replace if in ‘adjoin’ mode.
                     (unless (fx=? mode (mode-adjoin))
                       ;; Replace the existing pair.
@@ -273,21 +273,21 @@
                     (let ((chain (create-chain `(,key . ,value)
                                                pair1)))
                       (setter! chain)
-                      (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
+                      (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm)))
                       hm))
                    ((fx<? pm% pm1%)
                     (let ((array1
                            (make-array-node (fxior pm% pm1%)
                                             `(,key . ,value) pair1)))
                       (setter! array1)
-                      (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
+                      (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm)))
                       hm))
                    ((fx<? pm1% pm%)
                     (let ((array1
                            (make-array-node (fxior pm% pm1%)
                                             pair1 `(,key . ,value))))
                       (setter! array1)
-                      (set-hashmap-size! hm (fx+ 1 (hashmap-size hm)))
+                      (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm)))
                       hm))
                    (else
                     (let* ((array1 (make-vector 2))
@@ -316,31 +316,31 @@
                 (insert-at-chain (get-entry-quickly array i)))
                (else (increase-depth))))))))))
 
-(define (hashmap-set-from-alist! hm alst)
+(define (hashassoc-set-from-alist! hm alst)
   (let loop ((p alst)
              (hm hm))
     (if (null-list? p)
       hm
-      (loop (cdr p) (hashmap-set! hm (caar p) (cdar p))))))
+      (loop (cdr p) (hashassoc-set! hm (caar p) (cdar p))))))
 
 ;;;-------------------------------------------------------------------
 ;;;
 ;;; Deletion from the structure.
 ;;;
 
-(define hashmap-delete!
+(define hashassoc-delete!
   (case-lambda
     ((hm key)
      ;;
      ;; Whether the key is found can be detected by looking for a
-     ;; change in hashmap size.
+     ;; change in hashassoc size.
      ;;
-     (case (hashmap-size hm)
+     (case (hashassoc-size hm)
        ((0) hm)
        ((1) (begin
-              (when (hashmap-ref hm key)
-                (set-hashmap-size! hm 0)
-                (set-hashmap-trie! hm #f))
+              (when (hashassoc-ref hm key)
+                (set-hashassoc-size! hm 0)
+                (set-hashassoc-trie! hm #f))
               hm))
        (else (begin
                (delete-from-trie! hm key)
@@ -349,7 +349,7 @@
      ;;
      ;; Multiple keys can listed in the command.
      ;;
-     (hashmap-delete-from-list! hm rest*))))
+     (hashassoc-delete-from-list! hm rest*))))
 
 (define (delete-from-trie! hm key)
   ;;
@@ -378,7 +378,7 @@
         ((¶) 2)))
 
     (define (fill-route!)
-      (let loop ((array (hashmap-trie hm))
+      (let loop ((array (hashassoc-trie hm))
                  (pm (depth->popmap 0)))
         (if (hash-bits-exhausted? pm)
           #f
@@ -390,11 +390,11 @@
             (cond
               ((not entry) #f)
               ((pair? entry)
-               (let ((equiv? (hashmap-equiv? hm))
+               (let ((equiv? (hashassoc-equiv? hm))
                      (k (car entry)))
                  (equiv? key k)))
               ((chain? entry)
-               (let* ((equiv? (hashmap-equiv? hm))
+               (let* ((equiv? (hashassoc-equiv? hm))
                       (matches? (lambda (k) (equiv? key k))))
                  (let-values (((rest-of-chain size-change)
                                (delete-from-chain! entry matches?)))
@@ -504,7 +504,7 @@
            (handle-middle-depth!)))))
 
     (define (shrink-foundation-array)
-      (let* ((array (hashmap-trie hm))
+      (let* ((array (hashassoc-trie hm))
              (level (vector-ref route 0))
              (pm (vector-ref level ($pm)))
              (i (vector-ref level ($i)))
@@ -530,14 +530,14 @@
         (cond
           ((eq? depth 'chain) )
           ((fxzero? depth)
-           (set-hashmap-trie! hm (shrink-foundation-array)))
+           (set-hashassoc-trie! hm (shrink-foundation-array)))
           (else (rebuild-subtrie!)))
-        (set-hashmap-size! hm (fx- (hashmap-size hm) 1))))))
+        (set-hashassoc-size! hm (fx- (hashassoc-size hm) 1))))))
 
-(define (hashmap-delete-from-list! hm lst)
+(define (hashassoc-delete-from-list! hm lst)
   (do ((p lst (cdr p)))
       ((null-list? p))
-    (hashmap-delete! hm (car p)))
+    (hashassoc-delete! hm (car p)))
   hm)
 
 ;;;-------------------------------------------------------------------
@@ -545,16 +545,16 @@
 ;;; Walking the trie.
 ;;;
 
-(define (hashmap->vector hm)
+(define (hashassoc->vector hm)
   ;;
   ;; Walk the trie and list the key-value pairs in a vector, in any
   ;; order. The order need not be the same from run to run of the
   ;; procedure, although the implementation may be such that this is
   ;; so.
   ;;
-  (if (hashmap-empty? hm)
+  (if (hashassoc-empty? hm)
     (vector)
-    (let recurs ((array (hashmap-trie hm)))
+    (let recurs ((array (hashassoc-trie hm)))
       (concatenate-vectors
        (map (lambda (i)
               (let ((entry (get-entry-quickly array i)))
@@ -579,15 +579,15 @@
         (set! i (fx+ i m))))
     vec))
 
-(define (hashmap->alist hm)
+(define (hashassoc->alist hm)
   ;;
   ;; Walk the trie and list the key-value pairs, in any order. The
   ;; order need not be the same from run to run of the procedure,
   ;; although the implementation may be such that this is so.
   ;;
-  (hashmap-fold cons '() hm))
+  (hashassoc-fold cons '() hm))
 
-(define (hashmap->generator hm)
+(define (hashassoc->generator hm)
   ;;
   ;; Make a generator that walks the trie and returns the key-value
   ;; pairs, in any order. The order need not be the same from run to
@@ -597,7 +597,7 @@
   ;; When the generator is finished returning key-value pairs, it
   ;; returns an end-of-file object whenever called.
   ;;
-  (if (hashmap-empty? hm)
+  (if (hashassoc-empty? hm)
     (lambda () (eof-object))
     (let ()
       (define suspend '<undefined>)
@@ -615,7 +615,7 @@
                  (set! caller-of-generator
                    (caller-of-generator value)))))
             (set! suspend suspension-procedure)
-            (hashmap-fold (lambda (entry _) (suspend entry) #t)
+            (hashassoc-fold (lambda (entry _) (suspend entry) #t)
                           #t hm)
             (set! resume-generator (lambda () (eof-object)))
             (resume-generator))))
@@ -623,7 +623,7 @@
         (call/cc
          (lambda (ε) (resume-generator ε)))))))
 
-(define (hashmap-fold kons knil hm)
+(define (hashassoc-fold kons knil hm)
   ;;
   ;; Walk the trie in any order. The order need not be the same from
   ;; run to run of the procedure, although the implementation may be
@@ -632,11 +632,11 @@
   ;;  (kons kv-pairN (...(kons kv-pair1 (kons kv-pair0 knil))...))
   ;;
   ;; This makes any number of other operations simpler to implement.
-  ;; For instance it makes a one-liner of hashmap->alist. (Though
-  ;; hashmap->alist also can be one-lined from hashmap->vector.)
+  ;; For instance it makes a one-liner of hashassoc->alist. (Though
+  ;; hashassoc->alist also can be one-lined from hashassoc->vector.)
   ;;
   (let ((result knil))
-    (let recurs ((array (hashmap-trie hm)))
+    (let recurs ((array (hashassoc-trie hm)))
       (for-each
        (lambda (i)
          (let ((entry (get-entry-quickly array i)))

@@ -1,7 +1,7 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
-(define-library (hashmap low-level)
+(define-library (hashassoc low-level)
 
   (export make-array-node
           get-population-map
@@ -62,7 +62,7 @@
       (syntax-rules ()
         ((¶) 60)))
 
-    (include "hashmap/low-level-implementation.scm")
+    (include "hashassoc/low-level-implementation.scm")
 
     ))
 

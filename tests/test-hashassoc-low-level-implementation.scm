@@ -1,7 +1,7 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
-(display " ===== test-hashmap-low-level =====\n")
+(display " ===== test-hashassoc-low-level =====\n")
 
 (define hash-bits-limit 12)
 

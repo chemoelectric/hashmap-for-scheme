@@ -32,58 +32,60 @@ There are interfaces for R⁶RS, R⁷RS, Gambit Scheme (as an R⁷RS
 library), CHICKEN 5 Scheme (using the ‘r7rs’ egg), and CHICKEN 6
 Scheme (as an R⁷RS library).
 
-The following procedures are provided. Hash functions passed as
-arguments must return a nonnegative fixnum. Comparator objects passed
-as arguments are those of SRFI-128, and the outputs of their hash
-functions will be truncated to fixnums.
+The following procedures are provided.footnote:[To avoid confusion
+with SRFI-146, the procedure names are made from ‘_hashassoc_’ instead
+of ‘_hashmap_’.] Hash functions passed as arguments must return a
+nonnegative fixnum. Comparator objects passed as arguments are those
+of SRFI-128, and the outputs of their hash functions will be truncated
+to fixnums.
 
-*(make-hashmap _equiv?_ _hashfunc_ _key1_ _value1_ ...)*::
+*(make-hashassoc _equiv?_ _hashfunc_ _key1_ _value1_ ...)*::
     Make a new hashmap from a key-equivalence
     procedure,footnote:equiv[The key-equivalence procedure takes the
     _stored_ key as its _second_ argument.] a key-hash procedure, and
     the given keys and values.
-*(make-hashmap _comparator_ _key1_ _value1_ ...)*:: Make a new hashmap
-    from a comparator and the given keys and values.
-*(alist*+->+*hashmap _equiv?_ _hashfunc_ _alist_)*:: Make a new
+*(make-hashassoc _comparator_ _key1_ _value1_ ...)*:: Make a new
+    hashmap from a comparator and the given keys and values.
+*(alist*+->+*hashassoc _equiv?_ _hashfunc_ _alist_)*:: Make a new
     hashmap from a key-equivalence procedure,footnote:equiv[] a
     key-hash procedure, and an association list.
-*(alist*+->+*hashmap _comparator_ _alist_)*:: Make a new hashmap from
-    a comparator and an association list.
-*(hashmap*+->+*alist _hashmap_)*:: Return an association list
+*(alist*+->+*hashassoc _comparator_ _alist_)*:: Make a new hashmap
+    from a comparator and an association list.
+*(hashassoc*+->+*alist _hashmap_)*:: Return an association list
     containing, in any order, the same key-value pairs as the hashmap.
-*(vector*+->+*hashmap _equiv?_ _hashfunc_ _vector_)*:: Make a new
+*(vector*+->+*hashassoc _equiv?_ _hashfunc_ _vector_)*:: Make a new
     hashmap from a key-equivalence procedure,footnote:equiv[] a
     key-hash procedure, and a vector of key-value pairs.
-*(vector*+->+*hashmap _comparator_ _vector_)*:: Make a new hashmap
+*(vector*+->+*hashassoc _comparator_ _vector_)*:: Make a new hashmap
     from a comparator and a vector of key-value pairs.
-*(hashmap*+->+*vector _hashmap_)*:: Return a vector containing, in any
-    order, the same key-value pairs as the hashmap.
-*(hashmap*+->+*generator _hashmap_)*:: Return a thunk that generates,
-     in any order, the key-value pairs that are contained in the
-     hashmap. Once all the key-value pairs have been produced,
+*(hashassoc*+->+*vector _hashmap_)*:: Return a vector containing, in
+    any order, the same key-value pairs as the hashmap.
+*(hashassoc*+->+*generator _hashmap_)*:: Return a thunk that
+     generates, in any order, the key-value pairs that are contained
+     in the hashmap. Once all the key-value pairs have been produced,
      end-of-file objects are generated, instead.
-*(hashmap-fold _kons_ _knil_ _hashmap_)*:: Walk the hashmap in any
+*(hashassoc-fold _kons_ _knil_ _hashmap_)*:: Walk the hashmap in any
      order. Return the result of _(kons pairₙ (...(kons pair₁ (kons
      pair₀ knil))...))_
-*(hashmap? _object_)*:: Is the given object a hashmap? +#t+ or +#f+
-*(hashmap-size _hashmap_)*:: Return the number of key-value pairs
+*(hashassoc? _object_)*:: Is the given object a hashmap? +#t+ or +#f+
+*(hashassoc-size _hashmap_)*:: Return the number of key-value pairs
      stored in the hashmap.
-*(hashmap-empty? _hashmap_)*:: Is the number of key-value pairs in the
+*(hashassoc-empty? _hashmap_)*:: Is the number of key-value pairs in the
      hashmap equal to zero? +#t+ or +#f+
-*(hashmap-ref _hashmap_ _key_)*:: Try to retrieve a key-value pair
+*(hashassoc-ref _hashmap_ _key_)*:: Try to retrieve a key-value pair
      from the hashmap. If there is failure to find the key in the map,
      then return +#f+. If there is success, return not merely the
      value, but a _cons-pair_, containing both the _stored_ key and
      its corresponding value. This convention for return values makes
      it unambiguous whether retrieval is successful.
-*(hashmap-set! _hashmap_ _key1_ _value1_ ...)*:: Either insert or
+*(hashassoc-set! _hashmap_ _key1_ _value1_ ...)*:: Either insert or
      replace hashmap entries.
-*(hashmap-set-from-alist! _hashmap_ _alist_)*:: Either insert or
+*(hashassoc-set-from-alist! _hashmap_ _alist_)*:: Either insert or
      replace hashmap entries, taking the new key-value pairs from an
      association list.
-*(hashmap-delete! _hashmap_ _key1_ ...)*:: For every given key, if it
-     is contained in the hashmap, delete the corresponding key-value
-     pair.
-*(hashmap-delete-from-list! _hashmap_ _list_)*:: For every key in the
+*(hashassoc-delete! _hashmap_ _key1_ ...)*:: For every given key, if
+     it is contained in the hashmap, delete the corresponding
+     key-value pair.
+*(hashassoc-delete-from-list! _hashmap_ _list_)*:: For every key in the
      given list, if the key is contained in the hashmap, delete the
      corresponding key-value pair.

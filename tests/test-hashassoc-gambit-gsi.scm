@@ -4,12 +4,12 @@
 (import (scheme base)
         (scheme process-context)
         (scheme write)
-        (hashmap))
+        (hashassoc))
 (import (srfi 1))
 (import (srfi 42))
 (import (srfi 69))
 
-(include "test-hashmap-implementation.scm")
+(include "test-hashassoc-implementation.scm")
 
 ;;; local variables:
 ;;; mode: scheme

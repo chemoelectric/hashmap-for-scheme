@@ -1,7 +1,7 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
-(display " ===== test-hashmap =====\n")
+(display " ===== test-hashassoc =====\n")
 
 (include "tests/tests-common.scm")
 
@@ -14,34 +14,34 @@
 
 (do-ec
  (:list len (list 1 10 100 1000 10000 100000 1000000))
- (let* ((alist->string-hashmap
+ (let* ((alist->string-hashassoc
          (lambda (alst)
-           (alist->hashmap string=? string-hash alst)))
+           (alist->hashassoc string=? string-hash alst)))
         (pair=? (lambda (a b)
                   (and (string=? (car a) (car b))
                        (= (cdr a) (cdr b)))))
         (alst (list-ec (:range i 0 len)
                        `(,(number->string i 16) . ,i)))
-        (hm (alist->string-hashmap alst)))
+        (hm (alist->string-hashassoc alst)))
    (test-assert (every?-ec (:list pair alst)
                            (:let s (car pair))
                            (:let i (cdr pair))
-                           (:let pair% (hashmap-ref hm s))
+                           (:let pair% (hashassoc-ref hm s))
                            (:let s% (car pair%))
                            (:let i% (cdr pair%))
                            (and (string=? s s%) (= i i%))))
-   (test-equal len (hashmap-size hm))
+   (test-equal len (hashassoc-size hm))
    (when (<= len 1000)
-     (test-assert (lset= pair=? alst (hashmap->alist hm))))
-   (let ((hm (hashmap-set-from-alist! hm (reverse alst))))
+     (test-assert (lset= pair=? alst (hashassoc->alist hm))))
+   (let ((hm (hashassoc-set-from-alist! hm (reverse alst))))
      (test-assert (every?-ec (:list pair alst)
                              (:let s (car pair))
                              (:let i (cdr pair))
-                             (:let pair% (hashmap-ref hm s))
+                             (:let pair% (hashassoc-ref hm s))
                              (:let s% (car pair%))
                              (:let i% (cdr pair%))
                              (and (string=? s s%) (= i i%))))
-     (test-equal len (hashmap-size hm)))))
+     (test-equal len (hashassoc-size hm)))))
 
 (do-ec
  (:list len (list 1 10 100 1000 10000))
@@ -49,39 +49,39 @@
         (pair=? (lambda (a b)
                   (and (string=? (car a) (car b))
                        (= (cdr a) (cdr b)))))
-        (alist->tstring-hashmap
+        (alist->tstring-hashassoc
          (lambda (alst)
-           (alist->hashmap string=? tiny-hash alst)))
+           (alist->hashassoc string=? tiny-hash alst)))
         (alst (list-ec (:range i 0 len)
                        `(,(number->string i 16) . ,i)))
-        (hm (alist->tstring-hashmap alst)))
+        (hm (alist->tstring-hashassoc alst)))
    (test-assert (every?-ec (:list pair alst)
                            (:let s (car pair))
                            (:let i (cdr pair))
-                           (:let pair% (hashmap-ref hm s))
+                           (:let pair% (hashassoc-ref hm s))
                            (:let s% (car pair%))
                            (:let i% (cdr pair%))
                            (and (string=? s s%) (= i i%))))
    (when (<= len 1000)
-     (test-assert (lset= pair=? alst (hashmap->alist hm))))
-   (test-equal len (hashmap-size hm))))
+     (test-assert (lset= pair=? alst (hashassoc->alist hm))))
+   (test-equal len (hashassoc-size hm))))
 
 (do-ec
  (:list len (list 1 10 100 1000 10000 100000))
- (let* ((alist->string-hashmap
+ (let* ((alist->string-hashassoc
          (lambda (alst)
-           (alist->hashmap string=? string-hash alst)))
+           (alist->hashassoc string=? string-hash alst)))
         (alst1 (list-ec (:range i 0 (* 2 len))
                         `(,(number->string i 16) . ,i)))
-        (hm1 (alist->string-hashmap alst1))
+        (hm1 (alist->string-hashassoc alst1))
         (lst2 (list-ec (:range i 0 (* 2 len) 2)
                        (number->string i 16)))
-        (hm2 (hashmap-delete-from-list! hm1 lst2)))
+        (hm2 (hashassoc-delete-from-list! hm1 lst2)))
    (test-assert (every?-ec (:list pair (index j) alst1)
                            (if (odd? j))
                            (:let s (car pair))
                            (:let i (cdr pair))
-                           (:let pair% (hashmap-ref hm2 s))
+                           (:let pair% (hashassoc-ref hm2 s))
                            (:let s% (car pair%))
                            (:let i% (cdr pair%))
                            (and (string=? s s%) (= i i%))))
@@ -89,8 +89,8 @@
      (test-assert
          (lset= string=?
                 (lset-difference string=? (map car alst1) lst2)
-                (map! car (hashmap->alist hm2)))))
-   (test-equal len (hashmap-size hm2))))
+                (map! car (hashassoc->alist hm2)))))
+   (test-equal len (hashassoc-size hm2))))
 
 (do-ec
  (:list len (list 1 10 100 1000))
@@ -103,20 +103,20 @@
         (alst1 (list-ec (:range i 0 len)
                         `(,(number->string i 16) . ,i)))
         (hm1 (if (<= (length alst1) 10)
-               (apply make-hashmap
+               (apply make-hashassoc
                       (cons* string=? my-hash
                              (alist->plist alst1)))
-               (alist->hashmap string=? my-hash alst1)))
-        (g1 (hashmap->generator hm1))
+               (alist->hashassoc string=? my-hash alst1)))
+        (g1 (hashassoc->generator hm1))
         (alst2 '()))
    (do ((pair (g1) (g1)))
        ((eof-object? pair))
      (set! alst2 (cons pair alst2)))
    (test-assert (lset= pair=? alst1 alst2))
-   (let ((hm-empty (apply hashmap-delete!
+   (let ((hm-empty (apply hashassoc-delete!
                           (cons hm1 (map car alst2)))))
-     (test-assert (hashmap-empty? hm-empty))
-     (let ((g2 (hashmap->generator hm-empty)))
+     (test-assert (hashassoc-empty? hm-empty))
+     (let ((g2 (hashassoc->generator hm-empty)))
        (test-assert (eof-object? (g2)))))))
 
 (do-ec
@@ -130,16 +130,16 @@
         (alst1 (list-ec (:range i 0 len)
                         `(,(number->string i 16) . ,i)))
         (vec2 (list->vector alst1))
-        (hm1 (alist->hashmap string=? my-hash alst1))
-        (hm2 (vector->hashmap string=? my-hash vec2)))
+        (hm1 (alist->hashassoc string=? my-hash alst1))
+        (hm2 (vector->hashassoc string=? my-hash vec2)))
    (test-assert (lset= pair=?
-                       (hashmap->alist hm1)
-                       (hashmap->alist hm2)))
-   (let ((hm2 (vector->hashmap string=? my-hash
-                               (hashmap->vector hm2))))
+                       (hashassoc->alist hm1)
+                       (hashassoc->alist hm2)))
+   (let ((hm2 (vector->hashassoc string=? my-hash
+                               (hashassoc->vector hm2))))
      (test-assert (lset= pair=?
-                         (hashmap->alist hm1)
-                         (hashmap->alist hm2))))))
+                         (hashassoc->alist hm1)
+                         (hashassoc->alist hm2))))))
 
 (display successes)
 (display " successes\n")
