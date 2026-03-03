@@ -102,3 +102,6 @@ to fixnums.
 *(hashassoc-delete-from-list! _hashmap_ _list_)*:: For every key in the
      given list, if the key is contained in the hashmap, delete the
      corresponding key-value pair.
+*(hashassoc-difference _hashmap1_ ...)*:: Copy the first hashmap
+     listed. Then delete any entries whose keys are found in the other
+     hashmaps listed. This operation is analogous to a set difference.

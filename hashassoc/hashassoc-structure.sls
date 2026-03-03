@@ -30,7 +30,9 @@
           hashassoc->generator
           hashassoc-fold
 
-          hashassoc-copy)
+          hashassoc-copy
+
+          hashassoc-difference)
 
   (import (rename (except (rnrs base (6))
                           for-each map vector-fill!

@@ -29,7 +29,9 @@
           hashassoc->generator
           hashassoc-fold
 
-          hashassoc-copy)
+          hashassoc-copy
+
+          hashassoc-difference)
 
   (import (scheme base)
           (scheme write) ;; For debugging.

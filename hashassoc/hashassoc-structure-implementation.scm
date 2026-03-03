@@ -669,20 +669,22 @@
   ;; For instance it makes a one-liner of hashassoc->alist. (Though
   ;; hashassoc->alist also can be one-lined from hashassoc->vector.)
   ;;
-  (let ((result knil))
-    (let recurs ((array (hashassoc-trie hm)))
-      (for-each
-       (lambda (i)
-         (let ((entry (get-entry-quickly array i)))
-           (cond
-             ((pair? entry)
-              (set! result (kons entry result)))
-             ((chain? entry)
-              (set! result
-                (fold kons result (chain->alist entry))))
-             (else (recurs entry)))))
-       (iota (array-size array))))
-    result))
+  (if (hashassoc-empty? hm)
+    knil
+    (let ((result knil))
+      (let recurs ((array (hashassoc-trie hm)))
+        (for-each
+         (lambda (i)
+           (let ((entry (get-entry-quickly array i)))
+             (cond
+               ((pair? entry)
+                (set! result (kons entry result)))
+               ((chain? entry)
+                (set! result
+                  (fold kons result (chain->alist entry))))
+               (else (recurs entry)))))
+         (iota (array-size array))))
+      result)))
 
 ;;;-------------------------------------------------------------------
 ;;;
@@ -729,6 +731,29 @@
 (define (copy-chain chain)
   (alist->chain (map (lambda (pair) `(,(car pair) . ,(cdr pair)))
                      (chain->alist chain))))
+
+;;;-------------------------------------------------------------------
+;;;
+;;; Set-like operations on keys. These give precedence to pairs in
+;;; hashmaps listed earlier.
+;;;
+
+(define (set-operation-loop op arg*)
+  (define (loop hm1 hm*)
+    (if (null-list? hm*)
+      hm1
+      (loop (op hm1 (car hm*)) (cdr hm*))))
+  (loop (car arg*) (cdr arg*)))
+
+(define hashassoc-difference
+  (case-lambda
+    ((hm1 hm2)
+     (let ((hm (hashassoc-copy hm1)))
+       (hashassoc-fold (lambda (pair hm)
+                         (hashassoc-delete! hm (car pair)))
+                       hm hm2)))
+    ((hm1 . hm*) (set-operation-loop hashassoc-difference
+                                     (cons hm1 hm*)))))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:

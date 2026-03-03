@@ -12,7 +12,6 @@
           hashassoc->vector
 
           hashassoc-copy
-
           hashassoc->generator
           hashassoc-fold
 
@@ -30,7 +29,9 @@
           hashassoc-replace-from-alist!
 
           hashassoc-delete!
-          hashassoc-delete-from-list!)
+          hashassoc-delete-from-list!
+
+          hashassoc-difference)
 
   (import (hashassoc hashassoc-structure))
 
