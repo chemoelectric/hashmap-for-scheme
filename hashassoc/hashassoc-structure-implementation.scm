@@ -775,6 +775,11 @@
                      hm1 hm%))
    hm1 hm*))
 
+(define (hashassoc-symmetric-difference hm1 hm2)
+  (hashassoc-union
+   (hashassoc-difference hm1 hm2)
+   (hashassoc-difference hm2 hm1)))
+
 ;;;-------------------------------------------------------------------
 ;;; local variables:
 ;;; mode: scheme

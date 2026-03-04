@@ -126,3 +126,7 @@ to fixnums.
      entries whose keys are found in the other hashmaps
      listed.footnote:[The name *hashassoc-difference!* would be
      unintuitive for an in-place procedure.]
+*(hashassoc-symmetric-difference _hashmap1_ _hashmap2_)*:: Return a
+     structurally entirely new hashmap whose key-value associations
+     are those of _hashmap1_ not found in _hashmap2_ and those of
+     _hashmap2_ not found in _hashmap1_.

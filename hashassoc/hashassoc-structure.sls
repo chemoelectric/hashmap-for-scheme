@@ -37,7 +37,8 @@
           hashassoc-intersection
           hashassoc-intersect!
           hashassoc-difference
-          hashassoc-subtract!)
+          hashassoc-subtract!
+          hashassoc-symmetric-difference)
 
   (import (rename (except (rnrs base (6))
                           for-each map vector-fill!

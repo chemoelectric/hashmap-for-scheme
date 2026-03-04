@@ -38,7 +38,8 @@
           hashassoc-intersection
           hashassoc-intersect!
           hashassoc-difference
-          hashassoc-subtract!)
+          hashassoc-subtract!
+          hashassoc-symmetric-difference)
 
   (import (hashassoc hashassoc-structure))
 
