@@ -34,12 +34,19 @@ There are interfaces for R⁶RS, R⁷RS, Gambit Scheme (as an R⁷RS
 library), CHICKEN 5 Scheme (using the ‘r7rs’ egg), and CHICKEN 6
 Scheme (as an R⁷RS library).
 
-The following procedures are provided.footnote:[To avoid confusion
-with SRFI-146, the procedure names are made from ‘_hashassoc_’ instead
-of ‘_hashmap_’.] Hash functions passed as arguments must return a
-nonnegative fixnum. Comparator objects passed as arguments are those
-of SRFI-128, and the outputs of their hash functions will be truncated
-to fixnums.
+There is a makefile for GNU Make, with targets for testing with
+various Scheme implementations. The makefile has targets
+_install-chicken-5-egg_ and _install-chicken-6-egg_ to install CHICKEN
+eggs (using _sudo_ privileges for installation). There are
+corresponding targets _uninstall-chicken-5-egg_ and
+_uninstall-chicken-6-egg_. The egg is called *hashassoc*.
+
+Import the library as *(hashassoc)*. The following procedures are
+provided.footnote:[To avoid confusion with SRFI-146, the procedure
+names are made from ‘_hashassoc_’ instead of ‘_hashmap_’.] Hash
+functions passed as arguments must return a nonnegative fixnum.
+Comparator objects passed as arguments are those of SRFI-128, and the
+outputs of their hash functions will be truncated to fixnums.
 
 *(make-hashassoc _equiv?_ _hashfunc_ _key1_ _value1_ ...)*::
     Make a new hashmap from a key-equivalence
