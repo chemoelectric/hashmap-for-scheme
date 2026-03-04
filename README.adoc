@@ -139,3 +139,23 @@ outputs of their hash functions will be truncated to fixnums.
      structurally entirely new hashmap whose key-value associations
      are those of _hashmap1_ not found in _hashmap2_ and those of
      _hashmap2_ not found in _hashmap1_.
+*(hashassoc=? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::
+*(hashassoc*+<+*? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::
+*(hashassoc*+<=+*? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::
+*(hashassoc*+>+*? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::
+*(hashassoc*+>=+*? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::
+     Boolean-valued procedures analogous to subset and superset
+     relations. Each hashmap listed must have the same key-equivalence
+     procedure, or the return value is +#f+. The sizes of the listed
+     hashmaps must be monotone according to the name of the procedure,
+     or the return value is +#f+. Otherwise all adjacent pairs of
+     hashmaps are compared in the following fashion. For each entry in
+     the ‘smaller’ (possibly actually equal-sized) hashmap of the two,
+     there must be an entry with matching key, in the other hashmap.
+     Then the two entries must match in their value field, as well. If
+     a _value-equiv?_ procedure is given, that is used, with its two
+     value arguments left-to-right according to the the order in which
+     the hashmaps are listed. If either +#f+ or +#t+ is given, then
+     the values are not compared and only the keys are relevant. If
+     none of these is given, then *equal?* is used as the
+     _value-equiv=?_ procedure.
