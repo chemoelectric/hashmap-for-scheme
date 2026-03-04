@@ -136,7 +136,7 @@
                        (hashassoc->alist hm1)
                        (hashassoc->alist hm2)))
    (let ((hm2 (vector->hashassoc string=? my-hash
-                               (hashassoc->vector hm2))))
+                                 (hashassoc->vector hm2))))
      (test-assert (lset= pair=?
                          (hashassoc->alist hm1)
                          (hashassoc->alist hm2))))))
@@ -212,11 +212,21 @@
         (hm100 (alist->hashassoc string=? my-hash
                                  (map cons
                                       (map num->str (iota 100))
-                                       (iota 100))))
+                                      (iota 100))))
         (hm1000 (alist->hashassoc string=? my-hash
                                   (map cons
                                        (map num->str (iota 1000))
-                                       (iota 1000)))))
+                                       (iota 1000))))
+        (hm1000a (alist->hashassoc string=? my-hash
+                                   (map cons
+                                        (map num->str (iota 1000))
+                                        (map number->string
+                                             (iota 1000)))))
+        (hm1000b (alist->hashassoc string=? my-hash
+                                   (map cons
+                                        (map num->str (iota 1000))
+                                        (map (lambda (x) (* +i x))
+                                             (iota 1000))))))
 
    (test-assert (hashassoc=? hm1000))
    (test-assert (hashassoc>? hm1000))
@@ -226,6 +236,12 @@
 
    (test-assert (hashassoc=? hm0 hm0 hm0 hm0))
    (test-assert (hashassoc=? hm1000 hm1000 hm1000 hm1000))
+   (test-assert (not (hashassoc=? hm1000 hm1000a hm1000 hm1000a)))
+   (test-assert (hashassoc=? #f hm1000 hm1000a hm1000 hm1000a))
+   (test-assert (hashassoc=? #t hm1000 hm1000a hm1000 hm1000a))
+   (test-assert (hashassoc=? (lambda (a b)
+                               (zero? (+ (* a a) (* b b))))
+                             hm1000 hm1000b hm1000 hm1000b))
 
    (test-assert (not (hashassoc=? hm0 hm10 hm100 hm1000)))
    (test-assert (not (hashassoc<? hm0 hm10 hm100 hm100 hm1000)))
