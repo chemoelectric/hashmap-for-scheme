@@ -38,6 +38,7 @@
           hashassoc-difference
           hashassoc-subtract!
           hashassoc-symmetric-difference
+          hashassoc-disjoint?
 
           hashassoc=?
           hashassoc<?

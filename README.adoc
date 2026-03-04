@@ -139,6 +139,8 @@ outputs of their hash functions will be truncated to fixnums.
      structurally entirely new hashmap whose key-value associations
      are those of _hashmap1_ not found in _hashmap2_ and those of
      _hashmap2_ not found in _hashmap1_.
+*(hashassoc-disjoint? _hashmap1_ _hashmap2_)*:: Return +#t+ if the two
+     hashmaps have no keys in common. Otherwise return +#f+.
 *(hashassoc=? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::
 *(hashassoc*+<+*? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::
 *(hashassoc*+<=+*? [#f|#t|_value-equiv=?_] _hashmap1_ ...)*::

@@ -780,6 +780,19 @@
    (hashassoc-difference hm1 hm2)
    (hashassoc-difference hm2 hm1)))
 
+(define (hashassoc-disjoint? hm1 hm2)
+  (let ((sz1 (hashassoc-size hm1))
+        (sz2 (hashassoc-size hm2)))
+    (let ((hm1 (if (fx<=? sz1 sz2) hm1 hm2))
+          (hm2 (if (fx<=? sz1 sz2) hm2 hm1)))
+      (guard (condition ((eq? condition 'early-exit) #f))
+        (hashassoc-fold (lambda (pair hm2)
+                          (if (hashassoc-ref hm2 (car pair))
+                            (raise 'early-exit)
+                            hm2))
+                        hm2 hm1)
+        #t))))
+
 ;;;-------------------------------------------------------------------
 ;;;
 ;;; Set-like operations on pairs.
