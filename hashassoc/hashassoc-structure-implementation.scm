@@ -738,22 +738,14 @@
 ;;; hashmaps listed earlier.
 ;;;
 
-(define (set-operation-loop op arg*)
-  (define (loop hm1 hm*)
-    (if (null-list? hm*)
-      hm1
-      (loop (op hm1 (car hm*)) (cdr hm*))))
-  (loop (car arg*) (cdr arg*)))
-
-(define hashassoc-difference
-  (case-lambda
-    ((hm1 hm2)
-     (let ((hm (hashassoc-copy hm1)))
+(define (hashassoc-difference hm1 . hm*)
+  (let ((hm (hashassoc-copy hm1)))
+    (fold
+     (lambda (hm% hm)
        (hashassoc-fold (lambda (pair hm)
                          (hashassoc-delete! hm (car pair)))
-                       hm hm2)))
-    ((hm1 . hm*) (set-operation-loop hashassoc-difference
-                                     (cons hm1 hm*)))))
+                       hm hm%))
+     hm hm*)))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:
