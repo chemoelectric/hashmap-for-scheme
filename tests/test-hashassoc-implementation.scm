@@ -199,6 +199,75 @@
    (test-equal len (hashassoc-size hm2))
    (test-assert (lset= pair=? alst1 (hashassoc->alist hm2)))))
 
+(do-ec
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((num->str (lambda (i) (number->string i 16)))
+        (hm0 (alist->hashassoc string=? my-hash '()))
+        (hm10 (alist->hashassoc string=? my-hash
+                                (map cons
+                                     (map num->str (iota 10))
+                                     (iota 10))))
+        (hm100 (alist->hashassoc string=? my-hash
+                                 (map cons
+                                      (map num->str (iota 100))
+                                       (iota 100))))
+        (hm1000 (alist->hashassoc string=? my-hash
+                                  (map cons
+                                       (map num->str (iota 1000))
+                                       (iota 1000)))))
+
+   (test-assert (hashassoc=? hm1000))
+   (test-assert (hashassoc>? hm1000))
+   (test-assert (hashassoc>=? hm1000))
+   (test-assert (hashassoc<? hm1000))
+   (test-assert (hashassoc<=? hm1000))
+
+   (test-assert (hashassoc=? hm0 hm0 hm0 hm0))
+   (test-assert (hashassoc=? hm1000 hm1000 hm1000 hm1000))
+
+   (test-assert (not (hashassoc=? hm0 hm10 hm100 hm1000)))
+   (test-assert (not (hashassoc<? hm0 hm10 hm100 hm100 hm1000)))
+   (test-assert (hashassoc<=? hm0 hm10 hm100 hm100 hm1000))
+   (test-assert (not (hashassoc>? hm0 hm10 hm100 hm1000)))
+   (test-assert (not (hashassoc>=? hm0 hm10 hm100 hm1000)))
+   (test-assert (not (hashassoc>? hm0 hm10 hm100 hm1000)))
+   (test-assert (not (hashassoc>=? hm0 hm10 hm100 hm1000)))
+
+   (test-assert (not (hashassoc=? hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<? hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<=? hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>? hm1000 hm100 hm10 hm0))
+   (test-assert (hashassoc>=? hm1000 hm100 hm10 hm0))
+   (test-assert (not (hashassoc>? hm1000 hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>=? hm1000 hm1000 hm100 hm10 hm0))
+
+   (test-assert (not (hashassoc=? #f hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<? #f hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<=? #f hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>? #f hm1000 hm100 hm10 hm0))
+   (test-assert (hashassoc>=? #f hm1000 hm100 hm10 hm0))
+   (test-assert (not (hashassoc>? #f hm1000 hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>=? #f hm1000 hm1000 hm100 hm10 hm0))
+
+   (test-assert (not (hashassoc=? #t hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<? #t hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<=? #t hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>? #t hm1000 hm100 hm10 hm0))
+   (test-assert (hashassoc>=? #t hm1000 hm100 hm10 hm0))
+   (test-assert (not (hashassoc>? #t hm1000 hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>=? #t hm1000 hm1000 hm100 hm10 hm0))
+
+   (test-assert (not (hashassoc=? eqv? hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<? eqv? hm1000 hm100 hm10 hm0)))
+   (test-assert (not (hashassoc<=? eqv? hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>? eqv? hm1000 hm100 hm10 hm0))
+   (test-assert (hashassoc>=? eqv? hm1000 hm100 hm10 hm0))
+   (test-assert (not (hashassoc>? eqv? hm1000 hm1000 hm100 hm10 hm0)))
+   (test-assert (hashassoc>=? eqv? hm1000 hm1000 hm100 hm10 hm0))
+   ))
+
 (display successes)
 (display " successes\n")
 (display failures)
