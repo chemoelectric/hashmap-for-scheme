@@ -32,7 +32,8 @@
           hashassoc-delete!
           hashassoc-delete-from-list!
 
-          hashassoc-difference)
+          hashassoc-difference
+          hashassoc-subtract!)
 
   (import (except (scheme base)
                   assv assq assoc

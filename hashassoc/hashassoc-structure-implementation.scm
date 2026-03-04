@@ -740,12 +740,15 @@
 
 (define (hashassoc-difference hm1 . hm*)
   (let ((hm (hashassoc-copy hm1)))
-    (fold
-     (lambda (hm% hm)
-       (hashassoc-fold (lambda (pair hm)
-                         (hashassoc-delete! hm (car pair)))
-                       hm hm%))
-     hm hm*)))
+    (apply hashassoc-subtract! (cons hm hm*))))
+
+(define (hashassoc-subtract! hm1 . hm*)
+  (fold
+   (lambda (hm% hm1)
+     (hashassoc-fold (lambda (pair hm1)
+                       (hashassoc-delete! hm1 (car pair)))
+                     hm1 hm%))
+   hm1 hm*))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:

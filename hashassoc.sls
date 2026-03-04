@@ -33,7 +33,8 @@
           hashassoc-delete!
           hashassoc-delete-from-list!
 
-          hashassoc-difference)
+          hashassoc-difference
+          hashassoc-subtract!)
 
   (import (hashassoc hashassoc-structure))
 

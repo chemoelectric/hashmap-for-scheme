@@ -31,7 +31,8 @@
 
           hashassoc-copy
 
-          hashassoc-difference)
+          hashassoc-difference
+          hashassoc-subtract!)
 
   (import (scheme base)
           (scheme write) ;; For debugging.

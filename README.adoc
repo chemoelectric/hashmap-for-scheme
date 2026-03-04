@@ -105,3 +105,7 @@ to fixnums.
 *(hashassoc-difference _hashmap1_ ...)*:: Copy the first hashmap
      listed. Then delete any entries whose keys are found in the other
      hashmaps listed. This operation is analogous to a set difference.
+*(hashassoc-subtract! _hashmap1_ ...)*:: Delete from _hashmap1_ any
+     entries whose keys are found in the other hashmaps
+     listed.footnote:[The name *hashassoc-difference!* would be
+     unintuitive for an in-place procedure.]

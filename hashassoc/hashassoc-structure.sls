@@ -32,7 +32,8 @@
 
           hashassoc-copy
 
-          hashassoc-difference)
+          hashassoc-difference
+          hashassoc-subtract!)
 
   (import (rename (except (rnrs base (6))
                           for-each map vector-fill!
