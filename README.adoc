@@ -2,31 +2,33 @@
 
 An implementation of hash array mapped tries for Scheme. The maps are
 mutable and in-place.footnote:[Implementing SRFI-146 hashmaps with
-this package would often require copying the whole structure, though
-not the keys and values. SRFI-146 effectively presumes—though
-carefully does not require—a persistent structure: one whose
-operations do not alter what is already written. Operations that do
-not copy the whole structure might be added at some point. However, a
-non-persistent hashmap is inherently very useful. What one _can_ do is
-provide the interface of SRFI-146 but not make this implementation a
-Scheme’s default one.] However, all operations that modify the map
-return the map as value, so code can be written as if the map were
-‘linear updating’.footnote:[I have long had an ATS2 implementation of
-hash tries. Once translated from ATS2, the code can be compiled with
-just a C compiler and some special headers. The ATS2 source code
-employs linear types and typechecking-time proofs for safety and
-requires only that stored objects be allocated to fixed locations, in
-the manner of a malloc. Garbage collection is not required, nor
-reference-counting, nor is any non-C runtime support needed. I may one
-day add this implementation as FFI for compatible Schemes. It is this
-ATS2 implementation that inspired me to implement non-persistent
-hashmaps. Indeed, to copy the ATS2 structure for SRFI-146 will require
-totally bypassing typesafety. It is lack of a linear type system, in
-which an object may be referred to only once at a time, that makes
-mutability (potentially) hazardous. Persistence, on the other hand,
-almost forces us to use a garbage collector or reference-counting. If
-one had to manually keep track of and free obsolete portions of
-structures, programming might become overwhelmingly burdensome.]
+this package would require often using _hashassoc-copy_ to copy the
+whole structure. SRFI-146 effectively presumes—though carefully does
+not require—a persistent structure: one whose operations do not alter
+what is already written. Operations that do not copy the whole
+structure might be added at some point. However, a non-persistent
+hashmap is inherently useful, and this implementation works
+_in-place_, which can be convenient. What one _can_ do is use the
+interface of SRFI-146 but not substitute a Scheme’s default
+implementation with this, or one can simply not use a SRFI-146
+interface.] However, all operations that modify the map return the map
+as value, so code can be written as if the map were ‘linear
+updating’.footnote:[I have long had an ATS2 implementation of hash
+tries. Once translated from ATS2, the code can be compiled with just a
+C compiler and some special headers. The ATS2 source code employs
+linear types and typechecking-time proofs for safety and requires only
+that stored objects be allocated to fixed locations, in the manner of
+a malloc. Garbage collection is not required, nor reference-counting,
+nor is any non-C runtime support needed. I may one day add this
+implementation as FFI for compatible Schemes. It is this ATS2
+implementation that inspired me to implement non-persistent hashmaps.
+Indeed, to copy the ATS2 structure for SRFI-146 will require totally
+bypassing typesafety. It is lack of a linear type system, in which an
+object may be referred to only once at a time, that makes mutability
+(potentially) hazardous. Persistence, on the other hand, almost forces
+us to use a garbage collector or reference-counting. If one had to
+manually keep track of and free obsolete portions of structures,
+programming might become overwhelmingly burdensome.]
 
 There are interfaces for R⁶RS, R⁷RS, Gambit Scheme (as an R⁷RS
 library), CHICKEN 5 Scheme (using the ‘r7rs’ egg), and CHICKEN 6
