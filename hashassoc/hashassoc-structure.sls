@@ -38,7 +38,9 @@
           hashassoc-intersect!
           hashassoc-difference
           hashassoc-subtract!
-          hashassoc-symmetric-difference)
+          hashassoc-symmetric-difference
+
+          hashassoc=?)
 
   (import (rename (except (rnrs base (6))
                           for-each map vector-fill!
@@ -48,6 +50,7 @@
                 bitwise-and)
           (rnrs io simple (6))
           (rnrs control (6))
+          (rnrs exceptions (6))
           (rnrs mutable-pairs (6))
           (srfi :1 lists)
           (srfi :128 comparators)

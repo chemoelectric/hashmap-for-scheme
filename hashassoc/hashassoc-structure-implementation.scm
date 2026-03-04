@@ -781,6 +781,38 @@
    (hashassoc-difference hm2 hm1)))
 
 ;;;-------------------------------------------------------------------
+;;;
+;;; Set-like operations on pairs.
+;;;
+
+(define (hashassoc=? value=? hm1 . hm*)
+  (let ((n (hashassoc-size hm1))
+        (equiv? (hashassoc-equiv? hm1))
+        (value=?
+         ;; If value=? is a boolean rather than a procedure, then
+         ;; ignore the values.
+         (if (boolean? value=?) (lambda (a b) #t) value=?)))
+    (cond
+      ((any (lambda (hm)
+              (or (not (fx=? n (hashassoc-size hm)))
+                  (not (eq? equiv? (hashassoc-equiv? hm)))))
+            hm*)
+       #f)
+      (else
+       (guard (condition ((eq? condition 'early-exit) #f))
+         (for-each
+          (lambda (hm)
+            (hashassoc-fold
+             (lambda (pair hm)
+               (let ((entry (hashassoc-ref hm (car pair))))
+                 (if (and entry (value=? (cdr pair) (cdr entry)))
+                   hm
+                   (raise 'early-exit))))
+             hm hm1))
+          hm*)
+         #t)))))
+
+;;;-------------------------------------------------------------------
 ;;; local variables:
 ;;; mode: scheme
 ;;; geiser-scheme-implementation: chez

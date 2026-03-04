@@ -38,7 +38,9 @@
           hashassoc-intersect!
           hashassoc-difference
           hashassoc-subtract!
-          hashassoc-symmetric-difference)
+          hashassoc-symmetric-difference
+
+          hashassoc=?)
 
   (import (except (scheme base)
                   assv assq assoc

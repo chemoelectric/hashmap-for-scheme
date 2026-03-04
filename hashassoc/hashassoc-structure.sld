@@ -37,7 +37,9 @@
           hashassoc-intersect!
           hashassoc-difference
           hashassoc-subtract!
-          hashassoc-symmetric-difference)
+          hashassoc-symmetric-difference
+
+          hashassoc=?)
 
   (import (scheme base)
           (scheme write) ;; For debugging.
