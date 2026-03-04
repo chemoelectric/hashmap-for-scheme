@@ -734,9 +734,34 @@
 
 ;;;-------------------------------------------------------------------
 ;;;
-;;; Set-like operations on keys. These give precedence to pairs in
-;;; hashmaps listed earlier.
+;;; Set-like operations on keys.
 ;;;
+
+(define (hashassoc-union hm1 . hm*)
+  (let ((hm (hashassoc-copy hm1)))
+    (apply hashassoc-add! (cons hm hm*))))
+
+(define (hashassoc-add! hm1 . hm*)
+  (fold
+   (lambda (hm% hm1)
+     (hashassoc-fold (lambda (pair hm1)
+                       (hashassoc-insert! hm1 (car pair) (cdr pair)))
+                     hm1 hm%))
+   hm1 hm*))
+
+(define (hashassoc-intersection hm1 . hm*)
+  (let ((hm (hashassoc-copy hm1)))
+    (apply hashassoc-intersect! (cons hm hm*))))
+
+(define (hashassoc-intersect! hm1 . hm*)
+  (let ((alst (hashassoc->alist hm1)))
+    (for-each (lambda (hm%)
+                (for-each (lambda (pair)
+                            (unless (hashassoc-ref hm% (car pair))
+                              (hashassoc-delete! hm1 (car pair))))
+                          alst))
+              hm*)
+    hm1))
 
 (define (hashassoc-difference hm1 . hm*)
   (let ((hm (hashassoc-copy hm1)))

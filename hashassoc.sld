@@ -31,6 +31,10 @@
           hashassoc-delete!
           hashassoc-delete-from-list!
 
+          hashassoc-union
+          hashassoc-add!
+          hashassoc-intersection
+          hashassoc-intersect!
           hashassoc-difference
           hashassoc-subtract!)
 

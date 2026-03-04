@@ -102,6 +102,23 @@ to fixnums.
 *(hashassoc-delete-from-list! _hashmap_ _list_)*:: For every key in the
      given list, if the key is contained in the hashmap, delete the
      corresponding key-value pair.
+*(hashassoc-union _hashmap1_ ...)*:: Copy the first hashmap listed.
+     Then successively insert entries from the other hashmaps listed.
+     Do not replace any already inserted entries. This operation is
+     analogous to a set union.
+*(hashassoc-add! _hashmap1_ ...)*:: Successively insert into
+     _hashmap1_ entries from the other hashmaps listed. Do not replace
+     any already inserted entries.footnote:[The name
+     *hashassoc-union!* would be unintuitive for an in-place
+     procedure.]
+*(hashassoc-intersection _hashmap1_ ...)*:: Copy the first hashmap
+     listed. Then delete any entries whose keys are not found in the
+     other hashmaps listed. This operation is analogous to a set
+     intersection.
+*(hashassoc-intersect! _hashmap1_ ...)*:: Delete from _hashmap1_ any
+     entries whose keys are not found in the other hashmaps
+     listed.footnote:[The name *hashassoc-intersection!* would be
+     unintuitive for an in-place procedure.]
 *(hashassoc-difference _hashmap1_ ...)*:: Copy the first hashmap
      listed. Then delete any entries whose keys are found in the other
      hashmaps listed. This operation is analogous to a set difference.

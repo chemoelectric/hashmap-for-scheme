@@ -32,6 +32,10 @@
 
           hashassoc-copy
 
+          hashassoc-union
+          hashassoc-add!
+          hashassoc-intersection
+          hashassoc-intersect!
           hashassoc-difference
           hashassoc-subtract!)
 
