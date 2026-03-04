@@ -39,7 +39,11 @@
           hashassoc-subtract!
           hashassoc-symmetric-difference
 
-          hashassoc=?)
+          hashassoc=?
+          hashassoc<?
+          hashassoc<=?
+          hashassoc>?
+          hashassoc>=?)
 
   (import (scheme base)
           (scheme write) ;; For debugging.

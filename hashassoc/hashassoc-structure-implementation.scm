@@ -785,32 +785,83 @@
 ;;; Set-like operations on pairs.
 ;;;
 
-(define (hashassoc=? value=? hm1 . hm*)
-  (let ((n (hashassoc-size hm1))
-        (equiv? (hashassoc-equiv? hm1))
-        (value=?
-         ;; If value=? is a boolean rather than a procedure, then
-         ;; ignore the values.
-         (if (boolean? value=?) (lambda (a b) #t) value=?)))
-    (cond
-      ((any (lambda (hm)
-              (or (not (fx=? n (hashassoc-size hm)))
-                  (not (eq? equiv? (hashassoc-equiv? hm)))))
-            hm*)
-       #f)
-      (else
-       (guard (condition ((eq? condition 'early-exit) #f))
-         (for-each
-          (lambda (hm)
-            (hashassoc-fold
-             (lambda (pair hm)
-               (let ((entry (hashassoc-ref hm (car pair))))
-                 (if (and entry (value=? (cdr pair) (cdr entry)))
-                   hm
-                   (raise 'early-exit))))
-             hm hm1))
-          hm*)
-         #t)))))
+(define (hashassoc-cmp% cmp value=? hm1 hm*)
+  (define equiv? (hashassoc-equiv? hm1))
+  (define (all-equiv?-are-the-same?)
+    (every (lambda (hm) (eq? equiv? (hashassoc-equiv? hm))) hm*))
+  (define (sizes-are-in-order?)
+    (let loop ((hm1 hm1)
+               (hm* hm*))
+      (cond
+        ((null-list? hm*) #t)
+        ((cmp (hashassoc-size hm1) (hashassoc-size (car hm*)))
+         (loop (car hm*) (cdr hm*)))
+        (else #f))))
+  (define val=?
+    ;; If value=? is a boolean rather than a procedure, then ignore
+    ;; the values. (A good case can be made for either #f or #t to be
+    ;; the indicator here. Thus we accept either.)
+    (if (boolean? value=?)
+      (lambda (a b) #t)
+      value=?))
+  (define (test hm1 hm2)
+    ;; hm1 is always smaller than or equal in size to hm2.
+    (if (hashassoc-empty? hm1)
+      #t
+      (guard (condition ((eq? condition 'early-exit) #f))
+        (hashassoc-fold
+         (lambda (pair hm2)
+           (let ((pair% (hashassoc-ref hm2 (car pair))))
+             (if (and pair% (val=? (cdr pair) (cdr pair%)))
+               hm2
+               (raise 'early-exit))))
+         hm2 hm1)
+        #t)))
+  (unless (or (boolean? value=?)
+              (procedure? value=?))
+    (error "expected a procedure or boolean" value=?))
+  (cond
+    ((not (all-equiv?-are-the-same?)) #f)
+    ((not (sizes-are-in-order?)) #f)
+    (else
+     (let loop ((hm1 hm1)
+                (hm* hm*))
+         (cond ((null-list? hm*) #t)
+               ((test hm1 (car hm*))
+                (loop (car hm*) (cdr hm*)))
+               (else #f))))))
+
+(define (hashassoc-cmp cmp arg1 arg*)
+  (if (or (boolean? arg1) (procedure? arg1))
+    (hashassoc-cmp% cmp arg1 (car arg*) (cdr arg*))
+    (hashassoc-cmp% cmp equal? arg1 arg*)))
+
+(define (hashassoc-reverse-cmp cmp arg1 arg*)
+  (cond ((boolean? arg1)
+         (let ((arg* (reverse arg*)))
+           (hashassoc-cmp% cmp arg1 (car arg*) (cdr arg*))))
+        ((procedure? arg1)
+         (let ((arg* (reverse arg*)))
+           (hashassoc-cmp% cmp (lambda (a b) (arg1 b a))
+                           (car arg*) (cdr arg*))))
+        (else
+         (let ((arg* (reverse (cons arg1 arg*))))
+         (hashassoc-cmp% cmp equal? (car arg*) (cdr arg*))))))
+
+(define (hashassoc=? arg1 . arg*)
+  (hashassoc-cmp fx=? arg1 arg*))
+
+(define (hashassoc<? arg1 . arg*)
+  (hashassoc-cmp fx<? arg1 arg*))
+
+(define (hashassoc<=? arg1 . arg*)
+  (hashassoc-cmp fx<=? arg1 arg*))
+
+(define (hashassoc>? arg1 . arg*)
+  (hashassoc-reverse-cmp fx<? arg1 arg*))
+
+(define (hashassoc>=? arg1 . arg*)
+  (hashassoc-reverse-cmp fx<=? arg1 arg*))
 
 ;;;-------------------------------------------------------------------
 ;;; local variables:

@@ -40,7 +40,11 @@
           hashassoc-subtract!
           hashassoc-symmetric-difference
 
-          hashassoc=?)
+          hashassoc=?
+          hashassoc<?
+          hashassoc<=?
+          hashassoc>?
+          hashassoc>=?)
 
   (import (rename (except (rnrs base (6))
                           for-each map vector-fill!

@@ -40,7 +40,11 @@
           hashassoc-subtract!
           hashassoc-symmetric-difference
 
-          hashassoc=?)
+          hashassoc=?
+          hashassoc<?
+          hashassoc<=?
+          hashassoc>?
+          hashassoc>=?)
 
   (import (except (scheme base)
                   assv assq assoc
