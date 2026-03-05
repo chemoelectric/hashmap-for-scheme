@@ -631,31 +631,46 @@
   ;; When the generator is finished returning key-value pairs, it
   ;; returns an end-of-file object whenever called.
   ;;
+  ;; (The following implementation is in a continuation-passing style,
+  ;; to keep the code simple while avoiding call/cc. Some Schemes have
+  ;; slow call/cc.)
+  ;;
   (if (hashassoc-empty? hm)
     (lambda () (eof-object))
-    (let ()
-      (define suspend '<undefined>)
-      (define resume-generator
-        (lambda (ε)
-          ;; ε is the point in the program where the generator
-          ;; was called.
-          (let ((caller-of-generator ε))
-            (define (suspension-procedure value)
-              (call/cc
-               (lambda (cc)
-                 ;; Resume at the point following the ‘suspend’.
-                 (set! resume-generator cc)
-                 ;; Perform the suspension.
-                 (set! caller-of-generator
-                   (caller-of-generator value)))))
-            (set! suspend suspension-procedure)
-            (hashassoc-fold (lambda (entry _) (suspend entry) #t)
-                          #t hm)
-            (set! resume-generator (lambda () (eof-object)))
-            (resume-generator))))
-      (lambda ()
-        (call/cc
-         (lambda (ε) (resume-generator ε)))))))
+    (make-trie-generator (hashassoc-trie hm))))
+
+(define (make-trie-generator trie)
+  (define (generate-array kontinue array i)
+    (if (fx=? i (array-size array))
+      (kontinue)
+      (let ((entry (get-entry-quickly array i)))
+        (cond
+          ((pair? entry)
+           (set! continue-here
+             (lambda ()
+               (generate-array kontinue array (fx+ i 1))))
+           entry)
+          ((chain? entry)
+           (generate-alist
+            (lambda ()
+              (generate-array kontinue array (fx+ i 1)))
+            (chain->alist entry)))
+          (else
+           (generate-array
+            (lambda ()
+              (generate-array kontinue array (fx+ i 1)))
+            entry 0))))))
+  (define (generate-alist kontinue alst)
+    (if (null? alst)
+      (kontinue)
+      (begin
+        (set! continue-here
+          (lambda () (generate-alist kontinue (cdr alst))))
+        (car alst))))
+  (define continue-here
+    (lambda ()
+      (generate-array (lambda () (eof-object)) trie 0)))
+  (lambda () (continue-here)))
 
 (define (hashassoc-fold kons knil hm)
   ;;
