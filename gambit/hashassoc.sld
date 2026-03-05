@@ -68,6 +68,8 @@
 
   (begin
 
+    (define fx-greatest ##max-fixnum)
+
     (define-syntax hash-bits-chunk-max
       ;;
       ;; WARNING: This value is for eight-byte fixnums. For four-byte

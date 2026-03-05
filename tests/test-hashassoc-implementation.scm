@@ -142,6 +142,11 @@
                          (hashassoc->alist hm2))))))
 
 (do-ec
+ ;;
+ ;; Test hashassoc-set-from-alist!
+ ;;      hashassoc-insert-from-alist!
+ ;;      hashassoc-replace-from-alist!
+ ;;
  (:list len (list 1 10 100 1000))
  (:list my-hash (list string-hash
                       (lambda (str)
@@ -183,6 +188,9 @@
                        (hashassoc->alist hm-3)))))
 
 (do-ec
+ ;;
+ ;; Test hashassoc-delete-from-list!
+ ;;
  (:list len (list 1 10 100 1000))
  (:list my-hash (list string-hash
                       (lambda (str)
@@ -200,6 +208,9 @@
    (test-assert (lset= pair=? alst1 (hashassoc->alist hm2)))))
 
 (do-ec
+ ;;
+ ;; Test hashassoc=? hashassoc<? and so forth.
+ ;;
  (:list my-hash (list string-hash
                       (lambda (str)
                         (remainder (string-hash str) 2))))
@@ -282,6 +293,48 @@
    (test-assert (hashassoc>=? eqv? hm1000 hm100 hm10 hm0))
    (test-assert (not (hashassoc>? eqv? hm1000 hm1000 hm100 hm10 hm0)))
    (test-assert (hashassoc>=? eqv? hm1000 hm1000 hm100 hm10 hm0))
+   ))
+
+(do-ec
+ ;;
+ ;; Test hashassoc-union et al., and use a comparator.
+ ;;
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((cmp (make-comparator string? string=? string<? my-hash))
+        (hm1 (make-hashassoc cmp "0" 48 "1" 49 "2" 50 "3" 51 "4" 52 "5" 53))
+        (hm2 (make-hashassoc cmp "A" 65 "B" 66 "C" 67 "D" 68 "E" 69 "F" 70))
+        (hm3 (make-hashassoc cmp "a" 97 "b" 98 "c" 99 "d" 100 "e" 101 "f" 102))
+        (hm4 (make-hashassoc cmp "0" 48 "1" 49 "2" 50 "D" 68 "E" 69 "F" 70))
+        (hm5 (make-hashassoc cmp "a" 97 "1" 49 "2" 50 "D" 68 "E" 69 "F" 70)))
+   (test-assert (hashassoc=? = (hashassoc-union hm1 hm2 hm3)
+                             (make-hashassoc cmp "0" 48 "1" 49 "2" 50 "3" 51 "4" 52 "5" 53
+                                             "A" 65 "B" 66 "C" 67 "D" 68 "E" 69 "F" 70
+                                             "a" 97 "b" 98 "c" 99 "d" 100 "e" 101 "f" 102)))
+   (test-assert (hashassoc=? = (hashassoc-intersection hm1 hm2 hm3) (make-hashassoc cmp)))
+   (test-assert (hashassoc=? = (hashassoc-difference hm1 hm2 hm3) hm1))
+   (test-assert (hashassoc=? = (hashassoc-symmetric-difference hm1 hm2)
+                             (hashassoc-union hm1 hm2)))
+   (test-assert (hashassoc-disjoint? hm1 hm2))
+   (test-assert (not (hashassoc-disjoint? hm3 hm5)))
+   (test-assert (hashassoc=? = (hashassoc-union hm3 hm4 hm5)
+                             (make-hashassoc cmp "a" 97 "b" 98 "c" 99 "d" 100 "e" 101 "f" 102
+                                             "0" 48 "1" 49 "2" 50 "D" 68 "E" 69 "F" 70)))
+   (test-assert (hashassoc=? = (hashassoc-intersection hm3 hm4 hm5) (make-hashassoc cmp)))
+   (test-assert (hashassoc=? = (hashassoc-intersection hm4 hm5 hm3) (make-hashassoc cmp)))
+   (test-assert (hashassoc=? = (hashassoc-intersection hm5 hm3 hm4) (make-hashassoc cmp)))
+   (test-assert (hashassoc=? = (hashassoc-intersection hm3 hm4) (make-hashassoc cmp)))
+   (test-assert (hashassoc=? = (hashassoc-intersection hm4 hm5)
+                             (make-hashassoc cmp "1" 49 "2" 50 "D" 68 "E" 69 "F" 70)))
+   (test-assert (hashassoc=? = (hashassoc-difference hm4 hm5)
+                             (make-hashassoc cmp "0" 48)))
+   (test-assert (hashassoc=? = (hashassoc-difference hm5 hm4)
+                             (make-hashassoc cmp "a" 97)))
+   (test-assert (hashassoc=? = (hashassoc-symmetric-difference hm4 hm5)
+                             (make-hashassoc cmp "0" 48 "a" 97)))
+   (test-assert (hashassoc=? = (hashassoc-symmetric-difference hm5 hm4)
+                             (make-hashassoc cmp "0" 48 "a" 97)))
    ))
 
 (display successes)

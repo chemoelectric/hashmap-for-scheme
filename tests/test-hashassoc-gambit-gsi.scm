@@ -9,6 +9,10 @@
 (import (srfi 42))
 (import (srfi 69))
 
+;; SRFI-128 from Snow.
+;; snow-chibi install --impls gambit comparators
+(import (comparators))
+
 (include "test-hashassoc-implementation.scm")
 
 ;;; local variables:
