@@ -27,7 +27,7 @@
                  (hm (construct 0 equiv?
                                 (hashfunc->popmapfunc hashfunc) #f))
                  (alst (plist->alist rest*)))
-          (hashassoc-set-from-alist! hm alst)))))))
+            (hashassoc-set-from-alist! hm alst)))))))
 
   (constructor>
    alist->hashassoc
@@ -224,11 +224,11 @@
                           (set-in-chain! chain matches?
                                          `(,key . ,value)))
                          ((fx=? mode (mode-insert))
-                           (insert-in-chain! chain matches?
-                                             `(,key . ,value)))
+                          (insert-in-chain! chain matches?
+                                            `(,key . ,value)))
                          ((fx=? mode (mode-replace))
-                           (replace-in-chain! chain matches?
-                                              `(,key . ,value))))))
+                          (replace-in-chain! chain matches?
+                                             `(,key . ,value))))))
           (unless (fxzero? number)
             (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm))))
           hm))
@@ -800,13 +800,11 @@
         (sz2 (hashassoc-size hm2)))
     (let ((hm1 (if (fx<=? sz1 sz2) hm1 hm2))
           (hm2 (if (fx<=? sz1 sz2) hm2 hm1)))
-      (guard (condition ((eq? condition 'early-exit) #f))
-        (hashassoc-fold (lambda (pair hm2)
-                          (if (hashassoc-ref hm2 (car pair))
-                            (raise 'early-exit)
-                            hm2))
-                        hm2 hm1)
-        #t))))
+      (let ((gen! (hashassoc->generator hm1)))
+        (let loop ((pair (gen!)))
+          (cond ((eof-object? pair) #t)
+                ((hashassoc-ref hm2 (car pair)) #f)
+                (else (loop (gen!)))))))))
 
 ;;;-------------------------------------------------------------------
 ;;;
@@ -836,15 +834,14 @@
     ;; hm1 is always smaller than or equal in size to hm2.
     (if (hashassoc-empty? hm1)
       #t
-      (guard (condition ((eq? condition 'early-exit) #f))
-        (hashassoc-fold
-         (lambda (pair hm2)
-           (let ((pair% (hashassoc-ref hm2 (car pair))))
-             (if (and pair% (val=? (cdr pair) (cdr pair%)))
-               hm2
-               (raise 'early-exit))))
-         hm2 hm1)
-        #t)))
+      (let ((gen! (hashassoc->generator hm1)))
+        (let loop ((pair (gen!)))
+          (if (eof-object? pair)
+            #t
+            (let ((pair% (hashassoc-ref hm2 (car pair))))
+              (if (and pair% (val=? (cdr pair) (cdr pair%)))
+                (loop (gen!))
+                #f)))))))
   (unless (or (boolean? value=?)
               (procedure? value=?))
     (error "expected a procedure or boolean" value=?))
@@ -854,10 +851,10 @@
     (else
      (let loop ((hm1 hm1)
                 (hm* hm*))
-         (cond ((null-list? hm*) #t)
-               ((test hm1 (car hm*))
-                (loop (car hm*) (cdr hm*)))
-               (else #f))))))
+       (cond ((null-list? hm*) #t)
+             ((test hm1 (car hm*))
+              (loop (car hm*) (cdr hm*)))
+             (else #f))))))
 
 (define (hashassoc-cmp cmp arg1 arg*)
   (if (or (boolean? arg1) (procedure? arg1))
@@ -874,7 +871,7 @@
                            (car arg*) (cdr arg*))))
         (else
          (let ((arg* (reverse (cons arg1 arg*))))
-         (hashassoc-cmp% cmp equal? (car arg*) (cdr arg*))))))
+           (hashassoc-cmp% cmp equal? (car arg*) (cdr arg*))))))
 
 (define (hashassoc=? arg1 . arg*)
   (hashassoc-cmp fx=? arg1 arg*))
