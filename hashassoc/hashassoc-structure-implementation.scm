@@ -135,26 +135,27 @@
       (let loop ((array (hashassoc-trie hm))
                  (depth 0)
                  (pm (depth->popmap 0)))
-        (if (hash-bits-exhausted? pm)
-          #f
-          (let* ((mask (fx- pm 1))
-                 (i (fxbit-count
-                     (fxand mask (get-population-map array))))
-                 (entry (get-entry array i)))
-            (cond
-              ((not entry) #f)
-              ((pair? entry)
-               (let ((equiv? (hashassoc-equiv? hm))
-                     (k (car entry)))
-                 (if (equiv? key k) entry #f)))
-              ((chain? entry)
-               (let* ((equiv? (hashassoc-equiv? hm))
-                      (matches? (lambda (k) (equiv? key k))))
-                 (search-chain entry matches?)))
-              (else
-               (let ((next-depth (fx+ depth 1)))
-                 (loop entry next-depth
-                       (depth->popmap next-depth)))))))))))
+        (cond
+          ((hash-bits-exhausted? pm) #f)
+          ((fxzero? (fxand pm (get-population-map array))) #f)
+          (else
+           (let* ((mask (fx- pm 1))
+                  (i (fxbit-count
+                      (fxand mask (get-population-map array))))
+                  (entry (get-entry array i)))
+             (cond
+               ((pair? entry)
+                (let ((equiv? (hashassoc-equiv? hm))
+                      (k (car entry)))
+                  (if (equiv? key k) entry #f)))
+               ((chain? entry)
+                (let* ((equiv? (hashassoc-equiv? hm))
+                       (matches? (lambda (k) (equiv? key k))))
+                  (search-chain entry matches?)))
+               (else
+                (let ((next-depth (fx+ depth 1)))
+                  (loop entry next-depth
+                        (depth->popmap next-depth))))))))))))
 
 ;;;-------------------------------------------------------------------
 ;;;
@@ -250,20 +251,19 @@
                  (set-population-map! array1 new-popmap)
                  (do ((j 0 (fx+ j 1)))
                      ((fx=? j i))
-                   (set-entry! array1 j
-                               (get-entry-quickly array j)))
+                   (set-entry! array1 j (get-entry array j)))
                  (set-entry! array1 i `(,key . ,value))
                  (if (not (fx=? i n))
                    (do ((j i (fx+ j 1)))
                        ((fx=? j n))
                      (set-entry! array1 (fx+ j 1)
-                                 (get-entry-quickly array j))))
+                                 (get-entry array j))))
                  (setter! array1)
                  (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm)))
                  hm))
 
              (define (insert-at-pair)
-               (let* ((pair1 (get-entry-quickly array i))
+               (let* ((pair1 (get-entry array i))
                       (key1 (car pair1)))
                  (cond
                    (((hashassoc-equiv? hm) key key1)
@@ -319,7 +319,7 @@
                                          setter1!))))))
 
              (define (increase-depth)
-               (let* ((array1 (get-entry-quickly array i))
+               (let* ((array1 (get-entry array i))
                       (depth1 (fx+ depth 1))
                       (setter1 (lambda (elem)
                                  (set-entry! array i elem))))
@@ -330,10 +330,10 @@
                 (if (fx=? mode (mode-replace))
                   hm ;; No insertion when in ‘replace’ mode.
                   (expand-the-current-array!)))
-               ((pair? (get-entry-quickly array i))
+               ((pair? (get-entry array i))
                 (insert-at-pair))
-               ((chain? (get-entry-quickly array i))
-                (insert-at-chain (get-entry-quickly array i)))
+               ((chain? (get-entry array i))
+                (insert-at-chain (get-entry array i)))
                (else (increase-depth))))))))))
 
 (define (hashassoc-set-from-alist! hm alst)
@@ -414,44 +414,45 @@
     (define (fill-route!)
       (let loop ((array (hashassoc-trie hm))
                  (pm (depth->popmap 0)))
-        (if (hash-bits-exhausted? pm)
-          #f
-          (let* ((mask (fx- pm 1))
-                 (i (fxbit-count
-                     (fxand mask (get-population-map array))))
-                 (entry (get-entry array i)))
-            (vector-set! route depth (vector array pm i))
-            (cond
-              ((not entry) #f)
-              ((pair? entry)
-               (let ((equiv? (hashassoc-equiv? hm))
-                     (k (car entry)))
-                 (equiv? key k)))
-              ((chain? entry)
-               (let* ((equiv? (hashassoc-equiv? hm))
-                      (matches? (lambda (k) (equiv? key k))))
-                 (let-values (((rest-of-chain size-change)
-                               (delete-from-chain! entry matches?)))
-                   (cond
-                     ((fxzero? size-change) #f)
-                     ((pair? rest-of-chain)
-                      ;; The chain is gone and there is now just a
-                      ;; key-value pair. Go straight to ‘middle
-                      ;; depths’ processing.
-                      (set-entry! array i rest-of-chain)
-                      (set! deepest-depth (fx+ depth 1))
-                      #t)
-                     (else
-                      ;; The chain is still a chain. We will not have
-                      ;; to run rebuild-subtrie!
-                      (set-entry! array i rest-of-chain)
-                      ;; Indicate we need not rebuild the subtrie.
-                      (set! depth 'chain)
-                      #t)))))
-              (else
-               (set! depth (fx+ depth 1))
-               (set! deepest-depth depth)
-               (loop entry (depth->popmap depth))))))))
+        (cond
+          ((hash-bits-exhausted? pm) #f)
+          ((fxzero? (fxand pm (get-population-map array))) #f)
+          (else
+           (let* ((mask (fx- pm 1))
+                  (i (fxbit-count
+                      (fxand mask (get-population-map array))))
+                  (entry (get-entry array i)))
+             (vector-set! route depth (vector array pm i))
+             (cond
+               ((pair? entry)
+                (let ((equiv? (hashassoc-equiv? hm))
+                      (k (car entry)))
+                  (equiv? key k)))
+               ((chain? entry)
+                (let* ((equiv? (hashassoc-equiv? hm))
+                       (matches? (lambda (k) (equiv? key k))))
+                  (let-values (((rest-of-chain size-change)
+                                (delete-from-chain! entry matches?)))
+                    (cond
+                      ((fxzero? size-change) #f)
+                      ((pair? rest-of-chain)
+                       ;; The chain is gone and there is now just a
+                       ;; key-value pair. Go straight to ‘middle
+                       ;; depths’ processing.
+                       (set-entry! array i rest-of-chain)
+                       (set! deepest-depth (fx+ depth 1))
+                       #t)
+                      (else
+                       ;; The chain is still a chain. We will not have
+                       ;; to run rebuild-subtrie!
+                       (set-entry! array i rest-of-chain)
+                       ;; Indicate we need not rebuild the subtrie.
+                       (set! depth 'chain)
+                       #t)))))
+               (else
+                (set! depth (fx+ depth 1))
+                (set! deepest-depth depth)
+                (loop entry (depth->popmap depth)))))))))
 
     (define (rebuild-subtrie!)
       (let* ((level (vector-ref route depth))
@@ -468,13 +469,11 @@
             (set-population-map! array1 new-popmap)
             (do ((j 0 (fx+ j 1)))
                 ((fx=? j i))
-              (set-entry! array1 j
-                          (get-entry-quickly array j)))
+              (set-entry! array1 j (get-entry array j)))
             (if (not (fx=? i n-1))
               (do ((j i (fx+ j 1)))
                   ((fx=? j n-1))
-                (set-entry! array1 j
-                            (get-entry-quickly array (fx+ j 1)))))
+                (set-entry! array1 j (get-entry array (fx+ j 1)))))
             array1))
 
         (define (handle-middle-depth!)
@@ -483,7 +482,7 @@
             ;; If the current entry is a key-value pair, eliminate
             ;; this array. Continue at the next level. Othwerwise we
             ;; are done.
-            (let ((entry (get-entry-quickly array i)))
+            (let ((entry (get-entry array i)))
               (when (pair? entry)
                 (let* ((depth% (fx- depth 1))
                        (level% (vector-ref route depth%))
@@ -499,7 +498,7 @@
           ;;
           (define (deepest-level-size-two!)
             ;; The entry at i is a key-value pair to be deleted.
-            (let* ((entry1 (get-entry-quickly array (fx- 1 i)))
+            (let* ((entry1 (get-entry array (fx- 1 i)))
                    (depth% (fx- depth 1))
                    (level% (vector-ref route depth%))
                    (array% (vector-ref level% ($array)))
@@ -550,13 +549,11 @@
         (set-population-map! array1 new-popmap)
         (do ((j 0 (fx+ j 1)))
             ((fx=? j i))
-          (set-entry! array1 j
-                      (get-entry-quickly array j)))
+          (set-entry! array1 j (get-entry array j)))
         (if (not (fx=? i n-1))
           (do ((j i (fx+ j 1)))
               ((fx=? j n-1))
-            (set-entry! array1 j
-                        (get-entry-quickly array (fx+ j 1)))))
+            (set-entry! array1 j (get-entry array (fx+ j 1)))))
         array1))
 
     (let ((found? (fill-route!)))
@@ -591,7 +588,7 @@
     (let recurs ((array (hashassoc-trie hm)))
       (concatenate-vectors
        (map (lambda (i)
-              (let ((entry (get-entry-quickly array i)))
+              (let ((entry (get-entry array i)))
                 (cond
                   ((pair? entry) (vector entry))
                   ((chain? entry) (list->vector
@@ -643,7 +640,7 @@
   (define (generate-array kontinue array i)
     (if (fx=? i (array-size array))
       (kontinue)
-      (let ((entry (get-entry-quickly array i)))
+      (let ((entry (get-entry array i)))
         (cond
           ((pair? entry)
            (set! continue-here
@@ -690,7 +687,7 @@
       (let recurs ((array (hashassoc-trie hm)))
         (for-each
          (lambda (i)
-           (let ((entry (get-entry-quickly array i)))
+           (let ((entry (get-entry array i)))
              (cond
                ((pair? entry)
                 (set! result (kons entry result)))
@@ -733,7 +730,7 @@
     (set-population-map! array% (get-population-map array))
     (do ((i 0 (fx+ i 1)))
         ((fx=? i n))
-      (let ((entry (get-entry-quickly array i)))
+      (let ((entry (get-entry array i)))
         (cond
           ((pair? entry)
            (set-entry! array% i `(,(car entry) . ,(cdr entry))))

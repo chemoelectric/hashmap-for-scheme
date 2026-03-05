@@ -9,7 +9,6 @@
           set-population-map!
           array-size
           get-entry
-          get-entry-quickly
           set-entry!
 
           hash-bits-chunk-max

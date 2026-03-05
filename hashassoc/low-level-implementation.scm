@@ -21,14 +21,6 @@
 
 (define-syntax get-entry
   (syntax-rules ()
-    ((¶ node i)
-     (let ((i+1 (fx+ i 1)))
-       (if (fx<=? (vector-length node) i+1)
-         #f
-         (vector-ref node i+1))))))
-
-(define-syntax get-entry-quickly
-  (syntax-rules ()
     ((¶ node i) (vector-ref node (fx+ i 1)))))
 
 (define-syntax set-entry!
