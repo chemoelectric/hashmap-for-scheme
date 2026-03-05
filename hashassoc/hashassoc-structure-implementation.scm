@@ -162,6 +162,45 @@
 ;;; Insertion into the structure
 ;;;
 
+(define hashassoc-replace!
+  (case-lambda
+    ((hm key value) (hashassoc-replace!-aux hm key value))
+    ((hm . rest*) (hashassoc-replace-from-alist!
+                   hm (plist->alist rest*)))))
+
+(define (hashassoc-replace!-aux hm key value)
+  (if (hashassoc-empty? hm)
+    hm
+    (let ((depth->popmap ((key->depth->popmap hm) key)))
+      (let loop ((array (hashassoc-trie hm))
+                 (depth 0)
+                 (pm (depth->popmap 0)))
+        (cond
+          ((hash-bits-exhausted? pm) hm)
+          ((fxzero? (fxand pm (get-population-map array))) hm)
+          (else
+           (let* ((mask (fx- pm 1))
+                  (i (fxbit-count
+                      (fxand mask (get-population-map array))))
+                  (entry (get-entry array i)))
+             (cond
+               ((pair? entry)
+                (let ((equiv? (hashassoc-equiv? hm))
+                      (k (car entry)))
+                  (when (equiv? key k)
+                    (set-entry! array i `(,key . ,value)))
+                  hm))
+               ((chain? entry)
+                (let* ((equiv? (hashassoc-equiv? hm))
+                       (matches? (lambda (k) (equiv? key k))))
+                  (replace-in-chain! entry matches?
+                                     `(,key . ,value))
+                  hm))
+               (else
+                (let ((next-depth (fx+ depth 1)))
+                  (loop entry next-depth
+                        (depth->popmap next-depth))))))))))))
+
 (define-syntax mode-set
   (syntax-rules ()
     ((¶) 0)))
@@ -169,10 +208,6 @@
 (define-syntax mode-insert
   (syntax-rules ()
     ((¶) 1)))
-
-(define-syntax mode-replace
-  (syntax-rules ()
-    ((¶) 2)))
 
 (define hashassoc-set!
   (case-lambda
@@ -191,15 +226,6 @@
        (insert-entry! (mode-insert) hm key value)))
     ((hm . rest*)
      (hashassoc-insert-from-alist! hm (plist->alist rest*)))))
-
-(define hashassoc-replace!
-  (case-lambda
-    ((hm key value)
-     (if (hashassoc-empty? hm)
-       hm
-       (insert-entry! (mode-replace) hm key value)))
-    ((hm . rest*)
-     (hashassoc-set-from-alist! hm (plist->alist rest*)))))
 
 (define (make-initial-trie! hm key value)
   (let* ((depth->popmap ((key->depth->popmap hm) key))
@@ -226,10 +252,7 @@
                                          `(,key . ,value)))
                          ((fx=? mode (mode-insert))
                           (insert-in-chain! chain matches?
-                                            `(,key . ,value)))
-                         ((fx=? mode (mode-replace))
-                          (replace-in-chain! chain matches?
-                                             `(,key . ,value))))))
+                                            `(,key . ,value))))))
           (unless (fxzero? number)
             (set-hashassoc-size! hm (fx+ 1 (hashassoc-size hm))))
           hm))
@@ -271,9 +294,6 @@
                     (unless (fx=? mode (mode-insert))
                       ;; Replace the existing pair.
                       (set-entry! array i `(,key . ,value)))
-                    hm)
-                   ((fx=? mode (mode-replace))
-                    ;; Do not insert if in ‘replace’ mode.
                     hm)
                    (else
                     (grow-trie-at-pair
@@ -327,9 +347,7 @@
 
              (cond
                ((not (fx=? popmap new-popmap))
-                (if (fx=? mode (mode-replace))
-                  hm ;; No insertion when in ‘replace’ mode.
-                  (expand-the-current-array!)))
+                (expand-the-current-array!))
                ((pair? (get-entry array i))
                 (insert-at-pair))
                ((chain? (get-entry array i))
