@@ -9,13 +9,12 @@
   (constructor>
    make-hashassoc
    (lambda (construct)
-     (lambda (arg1 arg2 . rest*)
+     (lambda (arg1 . rest*)
        (cond
          ((comparator? arg1)
           (unless (comparator-hashable? arg1)
             (error "expected a hashable comparator" arg1))
           (let* ((cmp arg1)
-                 (rest* (cons arg2 rest*))
                  (hm (construct
                       0 (comparator-equality-predicate cmp)
                       (comparator->popmapfunc cmp) #f))
@@ -23,10 +22,10 @@
             (hashassoc-set-from-alist! hm alst)))
          (else
           (let* ((equiv? arg1)
-                 (hashfunc arg2)
+                 (hashfunc (car rest*))
                  (hm (construct 0 equiv?
                                 (hashfunc->popmapfunc hashfunc) #f))
-                 (alst (plist->alist rest*)))
+                 (alst (plist->alist (cdr rest*))))
             (hashassoc-set-from-alist! hm alst)))))))
 
   (constructor>
