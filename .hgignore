@@ -1,5 +1,9 @@
 ^\.akku$
 ^Akku.*
-.*~
+
+.*~$
+.*\.orig$
+^ATTIC/
+
 ^README\.(html|xhtml|xml|pdf|.*wiki|md)$
 ^.*\.tar\.xz$

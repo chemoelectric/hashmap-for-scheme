@@ -1,7 +1,8 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
+#!r6rs
 
-(define-library (hashassoc hashassoc-structure)
+(library (hashassoc hashassoc-structure)
 
   (export make-hashassoc
           alist->hashassoc
@@ -46,40 +47,33 @@
           hashassoc>?
           hashassoc>=?)
 
-  (import (scheme base)
-          (scheme write) ;; For debugging.
-          (scheme case-lambda))
-  (import (hashassoc define-record-factory)
+  (import (rename (except (rnrs base (6))
+                          for-each map vector-fill!
+                          vector->list list->vector)
+                  (error r6rs-error))
+          (only (rnrs arithmetic bitwise (6))
+                bitwise-and)
+          (rnrs io simple (6))
+          (rnrs control (6))
+          (rnrs exceptions (6))
+          (rnrs mutable-pairs (6))
+          (srfi :1 lists)
+          (srfi :128 comparators)
+          (srfi :133 vectors)
+          (srfi :143 fixnums)
+          (hashassoc hashassoc-include)
+          (hashassoc define-record-factory)
           (hashassoc low-level))
-  (cond-expand
-    (chicken-5 (import (srfi 1)))
-    ((library (scheme list)) (import (scheme list)))
-    ((library (srfi 1)) (import (srfi 1)))
-    (else (import (srfi srfi-1))))
-  (cond-expand
-    (chicken-5 (import (srfi 128)))
-    ((library (scheme comparator)) (import (scheme comparator)))
-    ((library (srfi 128)) (import (srfi 128)))
-    (else (import (srfi srfi-128))))
-  (cond-expand
-    (chicken-5 (import (srfi 143)))
-    ((library (scheme fixnum)) (import (scheme fixnum)))
-    ((library (srfi 143)) (import (srfi 143)))
-    (else (import (srfi srfi-143))))
-  (cond-expand
-    (chicken (import (only (chicken bitwise) bitwise-and)))
-    ((library (scheme bitwise)) (import (scheme bitwise)))
-    ((library (srfi 151)) (import (srfi 151)))
-    (else (import (srfi srfi-151))))
 
-  (begin
+  (define (error msg . arg*)
+    (apply r6rs-error (cons* #f msg arg*)))
 
-    (include "hashassoc/hashassoc-structure-implementation.scm")
+  (include "common/hashassoc/hashassoc-structure-implementation.scm")
 
-    ))
+  )
 
 ;;; local variables:
 ;;; mode: scheme
-;;; geiser-scheme-implementation: chibi
+;;; geiser-scheme-implementation: chez
 ;;; coding: utf-8
 ;;; end:

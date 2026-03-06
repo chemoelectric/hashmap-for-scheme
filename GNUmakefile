@@ -16,15 +16,16 @@ GAUCHE = gosh
 LOKO = loko
 SAGITTARIUS = sagittarius
 
-check = @$(foreach f,$(3),$(2)=.$${$(2)+:}$${$(2)} $(1) $(f);)
+check-r6rs = @$(foreach f,$(3),$(2)=$(PWD)/r6rs$${$(2)+:}$${$(2)} $(1) $(f);)
+check-r7rs = @$(foreach f,$(3),$(2)=$(PWD)/r7rs$${$(2)+:}$${$(2)} $(1) $(f);)
 
-check-chez-r6rs = $(call check,$(CHEZ) --program,CHEZSCHEMELIBDIRS,$(1))
-check-chibi-r7rs = $(call check,$(CHIBI),CHIBI_MODULE_PATH,$(1))
-check-gauche-r7rs = $(call check,$(GAUCHE) -r7 --,GAUCHE_LOAD_PATH,$(1))
-check-loko-r6rs = $(call check,$(LOKO) -std=r6rs --program,LOKO_LIBRARY_PATH,$(1))
-check-loko-r7rs = $(call check,$(LOKO) -std=r7rs --script,LOKO_LIBRARY_PATH,$(1))
-check-sagittarius-r6rs = $(call check,$(SAGITTARIUS) -d -r6 --,SAGITTARIUS_LOADPATH,$(1))
-check-sagittarius-r7rs = $(call check,$(SAGITTARIUS) -d -r7 --,SAGITTARIUS_LOADPATH,$(1))
+check-chez-r6rs = $(call check-r6rs,$(CHEZ) --program,CHEZSCHEMELIBDIRS,$(1))
+check-chibi-r7rs = $(call check-r7rs,$(CHIBI),CHIBI_MODULE_PATH,$(1))
+check-gauche-r7rs = $(call check-r7rs,$(GAUCHE) -r7 --,GAUCHE_LOAD_PATH,$(1))
+check-loko-r6rs = $(call check-r6rs,$(LOKO) -std=r6rs --program,LOKO_LIBRARY_PATH,$(1))
+check-loko-r7rs = $(call check-r7rs,$(LOKO) -std=r7rs --script,LOKO_LIBRARY_PATH,$(1))
+check-sagittarius-r6rs = $(call check-r6rs,$(SAGITTARIUS) -d -r6 --,SAGITTARIUS_LOADPATH,$(1))
+check-sagittarius-r7rs = $(call check-r7rs,$(SAGITTARIUS) -d -r7 --,SAGITTARIUS_LOADPATH,$(1))
 
 TSTPROG1_R6RS = tests/test-hashassoc-low-level.sps
 TSTPROG2_R6RS = tests/test-hashassoc.sps
@@ -107,7 +108,17 @@ CHICKEN_UNINSTALL_5 = chicken-uninstall
 
 CHICKEN_5_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_5) -repository)
 
-chicken-5/%: %
+chicken-5/README.adoc: README.adoc
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-5/%.sld: r7rs/%.sld
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-5/common/%.scm: common/%.scm
 	@mkdir -p $(@D) && \
 	rm -f $(@) && \
 	cp $(<) $(@)
@@ -118,8 +129,8 @@ chicken-5/hashassoc.egg: GNUmakefile \
 		hashassoc.sld \
 		hashassoc/hashassoc-structure.sld \
 		hashassoc/low-level.sld \
-		hashassoc/hashassoc-structure-implementation.scm \
-		hashassoc/low-level-implementation.scm)
+		common/hashassoc/hashassoc-structure-implementation.scm \
+		common/hashassoc/low-level-implementation.scm)
 	@mkdir -p chicken-5 && \
 	awk 'BEGIN { \
 	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \
@@ -170,7 +181,7 @@ uninstall-chicken-5-egg: chicken-5/hashassoc.egg
 	)
 
 clean-chicken-5:
-	-rm -Rf chicken-5/hashassoc
+	-rm -Rf chicken-5/hashassoc chicken-5/common
 	-rm -f chicken-5/README.adoc
 	-rm -f chicken-5/hashassoc.sld
 	-rm -f chicken-5/hashassoc.build.sh
@@ -200,7 +211,17 @@ CHICKEN_UNINSTALL_6 = chicken-uninstall-6
 
 CHICKEN_6_REPOSITORY_PATH = $(shell $(CHICKEN_INSTALL_6) -repository)
 
-chicken-6/%: %
+chicken-6/README.adoc: README.adoc
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-6/%.sld: r7rs/%.sld
+	@mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chicken-6/common/%.scm: common/%.scm
 	@mkdir -p $(@D) && \
 	rm -f $(@) && \
 	cp $(<) $(@)
@@ -212,8 +233,8 @@ chicken-6/hashassoc.egg: GNUmakefile \
 		hashassoc/define-record-factory.sld \
 		hashassoc/hashassoc-structure.sld \
 		hashassoc/low-level.sld \
-		hashassoc/hashassoc-structure-implementation.scm \
-		hashassoc/low-level-implementation.scm)
+		common/hashassoc/hashassoc-structure-implementation.scm \
+		common/hashassoc/low-level-implementation.scm)
 	@mkdir -p chicken-6 && \
 	awk 'BEGIN { \
 	  print "((synopsis \"Hashmaps (hash array mapped tries)\")"; \

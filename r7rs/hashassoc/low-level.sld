@@ -62,7 +62,7 @@
       (syntax-rules ()
         ((¶) 60)))
 
-    (include "hashassoc/low-level-implementation.scm")
+    (include "common/hashassoc/low-level-implementation.scm")
 
     ))
 
