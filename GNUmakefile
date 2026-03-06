@@ -126,9 +126,11 @@ chicken-5/common/%.scm: common/%.scm
 chicken-5/hashassoc.egg: GNUmakefile \
 	$(addprefix chicken-5/, \
 		README.adoc \
+		hashassoc/eager-comprehensions.sld \
 		hashassoc.sld \
 		hashassoc/hashassoc-structure.sld \
 		hashassoc/low-level.sld \
+		common/hashassoc/eager-comprehensions-implementation.scm \
 		common/hashassoc/hashassoc-structure-implementation.scm \
 		common/hashassoc/low-level-implementation.scm)
 	@mkdir -p chicken-5 && \
@@ -138,23 +140,30 @@ chicken-5/hashassoc.egg: GNUmakefile \
 	  print " (category data)"; \
 	  print " (license \"MIT\")"; \
 	  print " (author \"Barry Schwartz\")"; \
-	  print " (dependencies r7rs srfi-1 srfi-128 srfi-143)"; \
+	  print " (dependencies r7rs srfi-1 srfi-42 srfi-128 srfi-143)"; \
 	  print " (component-options"; \
 	  print "  (csc-options \"-X\" \"r7rs\" \"-R\" \"r7rs\" \"-O3\""; \
 	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
 	  print "  (extension hashassoc.low-level"; \
-	  print "   (source \"hashassoc/low-level.sld\"))"; \
+	  print "   (source \"hashassoc/low-level.sld\")"; \
+	  print "   (source-dependencies \"common/hashassoc/low-level-implementation.scm\"))"; \
 	  print "  (extension hashassoc.define-record-factory"; \
 	  print "   (source \"hashassoc.define-record-factory.scm\"))"; \
 	  print "  (extension hashassoc.hashassoc-structure"; \
 	  print "   (source \"hashassoc/hashassoc-structure.sld\")"; \
 	  print "   (component-dependencies hashassoc.define-record-factory)"; \
-	  print "   (component-dependencies hashassoc.low-level))"; \
+	  print "   (component-dependencies hashassoc.low-level)"; \
+	  print "   (source-dependencies \"common/hashassoc/hashassoc-structure-implementation.scm\"))"; \
 	  print "  (extension hashassoc"; \
 	  print "   (source \"hashassoc.sld\")"; \
-	  print "   (component-dependencies hashassoc.hashassoc-structure))))"; \
+	  print "   (component-dependencies hashassoc.hashassoc-structure))"; \
+	  print "  (extension hashassoc.eager-comprehensions"; \
+	  print "   (source \"hashassoc/eager-comprehensions.sld\")"; \
+	  print "   (component-dependencies hashassoc)"; \
+	  print "   (source-dependencies \"common/hashassoc/eager-comprehensions-implementation.scm\"))"; \
+	  print "   ))"; \
 	}' > $(@)
 
 chicken-5/hashassoc.so: chicken-5/hashassoc.egg \
@@ -229,10 +238,12 @@ chicken-6/common/%.scm: common/%.scm
 chicken-6/hashassoc.egg: GNUmakefile \
 	$(addprefix chicken-6/, \
 		README.adoc \
+		hashassoc/eager-comprehensions.sld \
 		hashassoc.sld \
 		hashassoc/define-record-factory.sld \
 		hashassoc/hashassoc-structure.sld \
 		hashassoc/low-level.sld \
+		common/hashassoc/eager-comprehensions-implementation.scm \
 		common/hashassoc/hashassoc-structure-implementation.scm \
 		common/hashassoc/low-level-implementation.scm)
 	@mkdir -p chicken-6 && \
@@ -242,23 +253,30 @@ chicken-6/hashassoc.egg: GNUmakefile \
 	  print " (category data)"; \
 	  print " (license \"MIT\")"; \
 	  print " (author \"Barry Schwartz\")"; \
-	  print " (dependencies srfi-1 srfi-128 srfi-143)"; \
+	  print " (dependencies srfi-1 srfi-42 srfi-128 srfi-143)"; \
 	  print " (component-options"; \
 	  print "  (csc-options \"-O3\""; \
 	  print "               \"-C\" \"-O3\""; \
 	  print "               ))"; \
 	  print " (components"; \
 	  print "  (extension hashassoc.low-level"; \
-	  print "   (source \"hashassoc/low-level.sld\"))"; \
+	  print "   (source \"hashassoc/low-level.sld\")"; \
+	  print "   (source-dependencies \"common/hashassoc/low-level-implementation.scm\"))"; \
 	  print "  (extension hashassoc.define-record-factory"; \
 	  print "   (source \"hashassoc/define-record-factory.sld\"))"; \
 	  print "  (extension hashassoc.hashassoc-structure"; \
 	  print "   (source \"hashassoc/hashassoc-structure.sld\")"; \
 	  print "   (component-dependencies hashassoc.define-record-factory)"; \
-	  print "   (component-dependencies hashassoc.low-level))"; \
+	  print "   (component-dependencies hashassoc.low-level)"; \
+	  print "   (source-dependencies \"common/hashassoc/hashassoc-structure-implementation.scm\"))"; \
 	  print "  (extension hashassoc"; \
 	  print "   (source \"hashassoc.sld\")"; \
-	  print "   (component-dependencies hashassoc.hashassoc-structure))))"; \
+	  print "   (component-dependencies hashassoc.hashassoc-structure))"; \
+	  print "  (extension hashassoc.eager-comprehensions"; \
+	  print "   (source \"hashassoc/eager-comprehensions.sld\")"; \
+	  print "   (component-dependencies hashassoc)"; \
+	  print "   (source-dependencies \"common/hashassoc/eager-comprehensions-implementation.scm\"))"; \
+	  print "   ))"; \
 	}' > $(@)
 
 chicken-6/hashassoc.so: chicken-6/hashassoc.egg

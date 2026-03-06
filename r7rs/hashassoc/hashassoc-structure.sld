@@ -55,21 +55,30 @@
     (chicken-5 (import (srfi 1)))
     ((library (scheme list)) (import (scheme list)))
     ((library (srfi 1)) (import (srfi 1)))
+    (loko (import (except (srfi :1 lists)
+                           map for-each
+                           assoc assv assq
+                           member memv memq
+                           list-copy list cons make-list)))
     (else (import (srfi srfi-1))))
   (cond-expand
     (chicken-5 (import (srfi 128)))
     ((library (scheme comparator)) (import (scheme comparator)))
     ((library (srfi 128)) (import (srfi 128)))
+    (loko (import (srfi :128 comparators)))
     (else (import (srfi srfi-128))))
   (cond-expand
     (chicken-5 (import (srfi 143)))
     ((library (scheme fixnum)) (import (scheme fixnum)))
     ((library (srfi 143)) (import (srfi 143)))
+    (loko (import (srfi :143 fixnums)))
     (else (import (srfi srfi-143))))
   (cond-expand
     (chicken (import (only (chicken bitwise) bitwise-and)))
     ((library (scheme bitwise)) (import (scheme bitwise)))
     ((library (srfi 151)) (import (srfi 151)))
+    (loko (import (only (rnrs arithmetic bitwise (6))
+                        bitwise-and)))
     (else (import (srfi srfi-151))))
 
   (begin

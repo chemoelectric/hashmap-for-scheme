@@ -146,11 +146,16 @@
                ((pair? entry)
                 (let ((equiv? (hashassoc-equiv? hm))
                       (k (car entry)))
-                  (if (equiv? key k) entry #f)))
+                  (if (equiv? key k)
+                    `(,(car entry) . ,(cdr entry))
+                    #f)))
                ((chain? entry)
                 (let* ((equiv? (hashassoc-equiv? hm))
                        (matches? (lambda (k) (equiv? key k))))
-                  (search-chain entry matches?)))
+                  (let ((elem (search-chain entry matches?)))
+                    (if elem
+                    `(,(car elem) . ,(cdr elem))
+                    #f))))
                (else
                 (let ((next-depth (fx+ depth 1)))
                   (loop entry next-depth
@@ -663,7 +668,7 @@
            (set! continue-here
              (lambda ()
                (generate-array kontinue array (fx+ i 1))))
-           entry)
+           `(,(car entry) . ,(cdr entry)))
           ((chain? entry)
            (generate-alist
             (lambda ()
@@ -680,7 +685,7 @@
       (begin
         (set! continue-here
           (lambda () (generate-alist kontinue (cdr alst))))
-        (car alst))))
+        `(,(caar alst) . ,(cdar alst)))))
   (define continue-here
     (lambda ()
       (generate-array (lambda () (eof-object)) trie 0)))
@@ -698,6 +703,7 @@
   ;; For instance it makes a one-liner of hashassoc->alist. (Though
   ;; hashassoc->alist also can be one-lined from hashassoc->vector.)
   ;;
+  (define (copy-pair pair) `(,(car pair) . ,(cdr pair)))
   (if (hashassoc-empty? hm)
     knil
     (let ((result knil))
@@ -707,10 +713,11 @@
            (let ((entry (get-entry array i)))
              (cond
                ((pair? entry)
-                (set! result (kons entry result)))
+                (set! result (kons (copy-pair entry) result)))
                ((chain? entry)
                 (set! result
-                  (fold kons result (chain->alist entry))))
+                  (fold kons result
+                        (map copy-pair (chain->alist entry)))))
                (else (recurs entry)))))
          (iota (array-size array))))
       result)))

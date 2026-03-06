@@ -33,11 +33,17 @@
     (chicken-5 (import (srfi 1)))
     ((library (scheme list))(import (scheme list)))
     ((library (srfi 1)) (import (srfi 1)))
+    (loko (import (except (srfi :1 lists)
+                          map for-each
+                          assoc assv assq
+                          member memv memq
+                          list-copy list cons make-list)))
     (else (import (srfi srfi-1))))
   (cond-expand
     (chicken-5 (import (srfi 143)))
     ((library (scheme fixnum)) (import (scheme fixnum)))
     ((library (srfi 143)) (import (srfi 143)))
+    (loko (import (srfi :143 fixnums)))
     (else (import (srfi srfi-143))))
 
   (begin
