@@ -5,6 +5,8 @@
 (library (hashassoc eager-comprehensions)
 
   (export :hashassoc
+          :hashassoc-keys
+          :hashassoc-values
 
           do-ec
           list-ec

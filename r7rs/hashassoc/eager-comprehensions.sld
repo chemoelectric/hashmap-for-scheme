@@ -3,7 +3,9 @@
 
 (define-library (hashassoc eager-comprehensions)
 
-  (export :hashassoc)
+  (export :hashassoc
+          :hashassoc-keys
+          :hashassoc-values)
 
   (export do-ec
           list-ec
