@@ -176,7 +176,7 @@ problematic in Schemes with module systems.) For some Scheme
 implementations the symbols are reëxported from a SRFI-42 library,
 whereas for others they are exported from our own copy of the SRFI-42
 reference code. It depends mainly on whether we think the external
-SRFI-42 library is broken.
+SRFI-42 library is broken, which we often do.
 
 The SRFI-42 interface is extended with the following syntax:
 
