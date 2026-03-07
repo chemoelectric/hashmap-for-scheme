@@ -4,7 +4,7 @@
 
 (library (hashassoc eager-comprehensions)
 
-  (export :hashassoc
+  (export :hashassoc-pairs
           :hashassoc-keys
           :hashassoc-values
 

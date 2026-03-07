@@ -63,7 +63,7 @@
           ((gen!))))
     ))
 
-(define-syntax :hashassoc
+(define-syntax :hashassoc-pairs
   (syntax-rules ()
     ((:hashassoc cc var (index i) arg)
      (hashassoc-gen (let ()) cc var (index i) arg))
