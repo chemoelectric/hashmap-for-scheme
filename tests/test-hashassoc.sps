@@ -9,10 +9,10 @@
         (rnrs io simple (6))
         (rnrs r5rs (6))
         (srfi :1 lists)
-        (srfi :42 eager-comprehensions)
         (srfi :128 comparators)
         (hashassoc hashassoc-include)
-        (hashassoc))
+        (hashassoc)
+        (hashassoc eager-comprehensions))
 
 (include "tests/test-hashassoc-implementation.scm")
 

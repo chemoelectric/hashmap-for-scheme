@@ -3,16 +3,22 @@
 
 (define-syntax :hashassoc
   (syntax-rules (index)
+    ((:hashassoc cc var (index i) arg)
+     (:do cc
+          (let ((gen! (hashassoc->generator arg))))
+          ((i 0) (var (gen!)))
+          (not (eof-object? var))
+          (let ())
+          #t
+          ((+ i 1) (gen!))))
     ((:hashassoc cc var arg)
      (:do cc
           (let ((gen! (hashassoc->generator arg))))
-          ((pair (gen!)))
-          (not (eof-object? pair))
-          (let ((var pair)))
+          ((var (gen!)))
+          (not (eof-object? var))
+          (let ())
           #t
-          ((gen!))))
-    ((:hashassoc cc var (index i) arg)
-     (:parallel cc (:hashassoc var arg) (:integers i)))))
+          ((gen!)))) ))
 
 ;;; local variables:
 ;;; mode: scheme

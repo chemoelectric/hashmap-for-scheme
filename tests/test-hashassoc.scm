@@ -5,7 +5,8 @@
 (import (scheme base)
         (scheme process-context)
         (scheme write)
-        (hashassoc))
+        (hashassoc)
+        (hashassoc eager-comprehensions))
 (cond-expand
   (chicken-5 (import (srfi 1)))
   ((library (scheme list)) (import (scheme list)))
@@ -18,11 +19,6 @@
   ((library (srfi 128)) (import (srfi 128)))
   (loko (import (srfi :128 comparators)))
   (else (import (srfi srfi-128))))
-(cond-expand
-  (chicken-5 (import (srfi 42)))
-  ((library (srfi 42)) (import (srfi 42)))
-  (loko (import (srfi :42 eager-comprehensions)))
-  (else (import (srfi srfi-42))))
 
 (include "tests/test-hashassoc-implementation.scm")
 
