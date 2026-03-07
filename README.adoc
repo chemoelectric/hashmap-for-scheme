@@ -48,25 +48,30 @@ functions passed as arguments must return a nonnegative fixnum.
 Comparator objects passed as arguments are those of SRFI-128, and the
 outputs of their hash functions will be truncated to fixnums.
 
-*(make-hashassoc _equiv?_ _hashfunc_ _key1_ _value1_ ...)*::
-    Make a new hashmap from a key-equivalence
-    procedure,footnote:equiv[The key-equivalence procedure takes the
-    _stored_ key as its _second_ argument.] a key-hash procedure, and
-    the given keys and values.
+*(make-hashassoc _equiv?_ _hashfunc_ _key1_ _value1_ ...)*:: Make a
+    new hashmap from a key-equivalence procedure,footnote:equiv[The
+    key-equivalence procedure takes the _stored_ key as its _second_
+    argument.] a key-hash procedure, and the given keys and values.
+    Key-value pairs earlier in the sequence have precedence.
 *(make-hashassoc _comparator_ _key1_ _value1_ ...)*:: Make a new
-    hashmap from a comparator and the given keys and values.
+    hashmap from a comparator and the given keys and values. Key-value
+    pairs earlier in the sequence have precedence.
 *(alist*+->+*hashassoc _equiv?_ _hashfunc_ _alist_)*:: Make a new
     hashmap from a key-equivalence procedure,footnote:equiv[] a
-    key-hash procedure, and an association list.
+    key-hash procedure, and an association list. Key-value pairs
+    earlier in the sequence have precedence.
 *(alist*+->+*hashassoc _comparator_ _alist_)*:: Make a new hashmap
-    from a comparator and an association list.
+    from a comparator and an association list. Key-value pairs earlier
+    in the sequence have precedence.
 *(hashassoc*+->+*alist _hashmap_)*:: Return an association list
     containing, in any order, the same key-value pairs as the hashmap.
 *(vector*+->+*hashassoc _equiv?_ _hashfunc_ _vector_)*:: Make a new
     hashmap from a key-equivalence procedure,footnote:equiv[] a
-    key-hash procedure, and a vector of key-value pairs.
+    key-hash procedure, and a vector of key-value pairs. Key-value
+    pairs earlier in the sequence have precedence.
 *(vector*+->+*hashassoc _comparator_ _vector_)*:: Make a new hashmap
-    from a comparator and a vector of key-value pairs.
+    from a comparator and a vector of key-value pairs. Key-value pairs
+    earlier in the sequence have precedence.
 *(hashassoc*+->+*vector _hashmap_)*:: Return a vector containing, in
     any order, the same key-value pairs as the hashmap.
 *(hashassoc-copy _hashmap_)*:: Make a structural copy of a hashmap.
@@ -161,3 +166,30 @@ outputs of their hash functions will be truncated to fixnums.
      the values are not compared and only the keys are relevant. If
      none of these is given, then *equal?* is used as the
      _value-equiv=?_ procedure.
+
+***
+
+A SRFI-42-style interface is available as *(hashassoc
+eager-comprehensions)*. The library exports many SRFI-42 symbols, but
+not those concerning dispatched generators. (Dispatched generators are
+problematic in Schemes with module systems.) For some Scheme
+implementations the symbols are reëxported from a SRFI-42 library,
+whereas for others they are exported from our own copy of the SRFI-42
+reference code. It depends mainly on whether we think the external
+SRFI-42 library is broken.
+
+The SRFI-42 interface is extended with the following syntax:
+
+*(hashassoc-ec _comparator_ _qualifier1_ ... _expression_)*::
+     _Comprehension_. The expression for this comprehension must
+     supply key-value pairs. Pairs generated earlier have precedence.
+*(:hashassoc-pairs  _var_ _hashmap1_ ...)*::
+*(:hashassoc-keys   _var_ _hashmap1_ ...)*::
+*(:hashassoc-values _var_ _hashmap1_ ...)*::
+*(:hashassoc-pairs  _var1_ (index _var2_) _hashmap1_ ...)*::
+*(:hashassoc-keys   _var1_ (index _var2_) _hashmap1_ ...)*::
+*(:hashassoc-values _var1_ (index _var2_) _hashmap1_ ...)*::
+     _Generators_. If more than one hashmap is listed, the hashmaps
+     are gone through in sequence. They need not all have the same key
+     and value types.
+
