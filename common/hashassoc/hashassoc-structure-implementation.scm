@@ -19,14 +19,14 @@
                       0 (comparator-equality-predicate cmp)
                       (comparator->popmapfunc cmp) #f))
                  (alst (plist->alist rest*)))
-            (hashassoc-set-from-alist! hm alst)))
+            (hashassoc-insert-from-alist! hm alst)))
          (else
           (let* ((equiv? arg1)
                  (hashfunc (car rest*))
                  (hm (construct 0 equiv?
                                 (hashfunc->popmapfunc hashfunc) #f))
                  (alst (plist->alist (cdr rest*))))
-            (hashassoc-set-from-alist! hm alst)))))))
+            (hashassoc-insert-from-alist! hm alst)))))))
 
   (constructor>
    alist->hashassoc
@@ -35,14 +35,14 @@
        ((equiv? hashfunc alst)
         (let ((hm (construct 0 equiv?
                              (hashfunc->popmapfunc hashfunc) #f)))
-          (hashassoc-set-from-alist! hm alst)))
+          (hashassoc-insert-from-alist! hm alst)))
        ((cmp alst)
         (unless (and (comparator? cmp)
                      (comparator-hashable? cmp))
           (error "expected a hashable comparator" cmp))
         (let ((hm (construct 0 (comparator-equality-predicate cmp)
                              (comparator->popmapfunc cmp) #f)))
-          (hashassoc-set-from-alist! hm alst))))))
+          (hashassoc-insert-from-alist! hm alst))))))
 
   (constructor>
    vector->hashassoc
@@ -106,7 +106,7 @@
     (do ((i 0 (fx+ i 1)))
         ((fx=? i n))
       (let-values (((key value) (car+cdr (vector-ref vec i))))
-        (hashassoc-set! hm key value)))
+        (hashassoc-insert! hm key value)))
     hm))
 
 ;;;-------------------------------------------------------------------

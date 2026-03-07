@@ -1,6 +1,13 @@
 ;; Copyright © 2026 Barry Schwartz
 ;; SPDX-License-Identifier: MIT
 
+(define-syntax hashassoc-ec
+  (syntax-rules ()
+    ((hashassoc-ec etc1 etc ...)
+     (fold-ec (make-hashassoc etc1) etc ...
+              (lambda (elem hm)
+                (hashassoc-insert! hm (car elem) (cdr elem)))))))
+
 (define-syntax hashassoc-gen
   (syntax-rules (index)
     ((¶ binding cc var (index i) arg)
