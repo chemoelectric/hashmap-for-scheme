@@ -64,7 +64,7 @@
     ))
 
 (define-syntax :hashassoc-pairs
-  (syntax-rules ()
+  (syntax-rules (index)
     ((:hashassoc cc var (index i) arg)
      (hashassoc-gen (let ()) cc var (index i) arg))
     ((:hashassoc cc var (index i) arg1 arg2 ...)
@@ -75,7 +75,7 @@
      (hashassoc-gen (let ()) cc var arg1 arg2 ...))))
 
 (define-syntax :hashassoc-keys
-  (syntax-rules ()
+  (syntax-rules (index)
     ((:hashassoc cc var (index i) arg)
      (hashassoc-gen (let ((var (car var)))) cc var (index i) arg))
     ((:hashassoc cc var (index i) arg1 arg2 ...)
@@ -86,7 +86,7 @@
      (hashassoc-gen (let ((var (car var)))) cc var arg1 arg2 ...))))
 
 (define-syntax :hashassoc-values
-  (syntax-rules ()
+  (syntax-rules (index)
     ((:hashassoc cc var (index i) arg)
      (hashassoc-gen (let ((var (cdr var)))) cc var (index i) arg))
     ((:hashassoc cc var (index i) arg1 arg2 ...)
