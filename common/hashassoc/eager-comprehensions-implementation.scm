@@ -8,7 +8,7 @@
               (lambda (elem hm)
                 (hashassoc-insert! hm (car elem) (cdr elem)))))))
 
-(define-syntax hashassoc-gen
+(define-syntax :hashassoc-gen%%
   (syntax-rules (index)
     ((¶ binding cc var (index i) arg)
      (:do cc
@@ -73,35 +73,35 @@
 (define-syntax :hashassoc-pairs
   (syntax-rules (index)
     ((:hashassoc cc var (index i) arg)
-     (hashassoc-gen (let ()) cc var (index i) arg))
+     (:hashassoc-gen%% (let ()) cc var (index i) arg))
     ((:hashassoc cc var (index i) arg1 arg2 ...)
-     (hashassoc-gen (let ()) cc var (index i) arg1 arg2 ...))
+     (:hashassoc-gen%% (let ()) cc var (index i) arg1 arg2 ...))
     ((:hashassoc cc var arg)
-     (hashassoc-gen (let ()) cc var arg))
+     (:hashassoc-gen%% (let ()) cc var arg))
     ((:hashassoc cc var arg1 arg2 ...)
-     (hashassoc-gen (let ()) cc var arg1 arg2 ...))))
+     (:hashassoc-gen%% (let ()) cc var arg1 arg2 ...))))
 
 (define-syntax :hashassoc-keys
   (syntax-rules (index)
     ((:hashassoc cc var (index i) arg)
-     (hashassoc-gen (let ((var (car var)))) cc var (index i) arg))
+     (:hashassoc-gen%% (let ((var (car var)))) cc var (index i) arg))
     ((:hashassoc cc var (index i) arg1 arg2 ...)
-     (hashassoc-gen (let ((var (car var)))) cc var (index i) arg1 arg2 ...))
+     (:hashassoc-gen%% (let ((var (car var)))) cc var (index i) arg1 arg2 ...))
     ((:hashassoc cc var arg)
-     (hashassoc-gen (let ((var (car var)))) cc var arg))
+     (:hashassoc-gen%% (let ((var (car var)))) cc var arg))
     ((:hashassoc cc var arg1 arg2 ...)
-     (hashassoc-gen (let ((var (car var)))) cc var arg1 arg2 ...))))
+     (:hashassoc-gen%% (let ((var (car var)))) cc var arg1 arg2 ...))))
 
 (define-syntax :hashassoc-values
   (syntax-rules (index)
     ((:hashassoc cc var (index i) arg)
-     (hashassoc-gen (let ((var (cdr var)))) cc var (index i) arg))
+     (:hashassoc-gen%% (let ((var (cdr var)))) cc var (index i) arg))
     ((:hashassoc cc var (index i) arg1 arg2 ...)
-     (hashassoc-gen (let ((var (cdr var)))) cc var (index i) arg1 arg2 ...))
+     (:hashassoc-gen%% (let ((var (cdr var)))) cc var (index i) arg1 arg2 ...))
     ((:hashassoc cc var arg)
-     (hashassoc-gen (let ((var (cdr var)))) cc var arg))
+     (:hashassoc-gen%% (let ((var (cdr var)))) cc var arg))
     ((:hashassoc cc var arg1 arg2 ...)
-     (hashassoc-gen (let ((var (cdr var)))) cc var arg1 arg2 ...))))
+     (:hashassoc-gen%% (let ((var (cdr var)))) cc var arg1 arg2 ...))))
 
 ;;; local variables:
 ;;; mode: scheme

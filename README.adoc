@@ -170,8 +170,9 @@ outputs of their hash functions will be truncated to fixnums.
 ***
 
 A SRFI-42-style interface is available as *(hashassoc
-eager-comprehensions)*. The library exports many SRFI-42 symbols, but
-not those concerning dispatched generators. (Dispatched generators are
+eager-comprehensions)*. (See below for how to use the interface with
+Gambit Scheme.) The library exports many SRFI-42 symbols, but not
+those concerning dispatched generators. (Dispatched generators are
 problematic in Schemes with module systems.) For some Scheme
 implementations the symbols are reëxported from a SRFI-42 library,
 whereas for others they are exported from our own copy of the SRFI-42
@@ -193,3 +194,24 @@ The SRFI-42 interface is extended with the following syntax:
      are gone through in sequence. They need not all have the same key
      and value types.
 
+In Gambit Scheme, you cannot import *(hashassoc
+eager-comprehensions)*. Also, SRFI-128 is available from Snow under
+the name *comparators* rather than *(srfi 128)*. Thus, instead install
+comparators with
+
+----
+snow-chibi install --impls gambit comparators
+----
+
+and put something like this in your code:
+
+[source,scheme]
+----
+(import (comparators))
+(include "hashassoc/ec.scm")
+(include "hashassoc/eager-comprehensions-implementation.scm")
+----
+
+The _hashassoc/ec.scm_ file is based closely on the reference sources
+for SRFI-42, and is more reliable than getting SRFI-42 support from
+elsewhere.
