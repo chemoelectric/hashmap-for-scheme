@@ -26,13 +26,14 @@
           insert-in-chain!
           set-in-chain!
           delete-from-chain!
+          copy-chain-with-replacement
           )
 
   (import (rnrs base (6))
           (rnrs io simple (6)) ;; For debugging.
           (rnrs control (6))
           (rnrs mutable-pairs (6))
-          (only (srfi :1 lists) find find-tail drop-right!)
+          (only (srfi :1 lists) find find-tail drop-right! list-copy)
           (srfi :143 fixnums)
           (hashassoc hashassoc-include))
 
@@ -54,6 +55,14 @@
     ;;
     (syntax-rules ()
       ((¶) 60)))
+
+  (define (vector-copy v)
+    (let* ((n (vector-length v))
+           (w (make-vector n)))
+      (do ((i (fx- n 1) (fx- i 1)))
+          ((fxnegative? i))
+        (vector-set! w i (vector-ref v i)))
+      w))
 
   (include "common/hashassoc/low-level-implementation.scm")
 

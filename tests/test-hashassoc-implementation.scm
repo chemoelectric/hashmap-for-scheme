@@ -12,6 +12,46 @@
       (reverse! q)
       (loop (cdr p) (cons* (cdar p) (caar p) q)))))
 
+(define (list-merge! less? lst1 lst2)
+  ;; This is a tail-recursive implementation, done here as an example
+  ;; of an implementation safe against memory blow-up and requiring no
+  ;; list reversal. (The implementation here resembles a typical ATS
+  ;; implementation for linear lists. Such lists can be used only
+  ;; once, and so the merge is of course destructive.)
+  (cond
+    ((null? lst1) lst2)
+    ((null? lst2) lst1)
+    (else
+     (let ((less12? (less? (car lst1) (car lst2))))
+       (let ((lst1 (if less12? lst1 lst2))
+             (lst2 (if less12? lst2 lst1)))
+         (let ((result lst1))
+           (let loop ((lst1 (cdr lst1))
+                      (lst2 lst2)
+                      (last result))
+             (cond
+               ((null? lst1)
+                (set-cdr! last lst2)
+                result)
+               ((null? lst2)
+                (set-cdr! last lst1)
+                result)
+               ((less? (car lst1) (car lst2))
+                (set-cdr! last lst1)
+                (loop (cdr lst1) lst2 (cdr last)))
+               (else
+                (set-cdr! last lst2)
+                (loop lst1 (cdr lst2) (cdr last)))))))))))
+
+(define (list-sort! less? lst)
+  (let ((n (length lst)))
+    (if (<= n 1)
+        lst
+        (let-values (((lst1 lst2) (split-at! lst (quotient n 2))))
+          (list-merge! less?
+                       (list-sort! less? lst1)
+                       (list-sort! less? lst2))))))
+
 (do-ec
  (:list len (list 1 10 100 1000 10000 100000 1000000))
  (let* ((alist->string-hashassoc
@@ -335,6 +375,41 @@
                              (make-hashassoc cmp "0" 48 "a" 97)))
    (test-assert (hashassoc=? = (hashassoc-symmetric-difference hm5 hm4)
                              (make-hashassoc cmp "0" 48 "a" 97)))
+   ))
+
+(do-ec
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((cmp (make-comparator string? string=? string<? my-hash))
+        (pair=? (lambda (a b)
+                  (and (string=? (car a) (car b))
+                       (= (cdr a) (cdr b)))))
+        (hm1 (hashassoc-ec cmp (:range i 0 1000)
+                           `(,(number->string i 16) . ,i)))
+        (hm2 hm1))
+   (do ((i 0 (+ i 1)))
+       ((= i 500))
+     (set! hm2 (hashassoc-replace hm2 (number->string i 16) (+ 10000 i))))
+   (let* ((alst2 (list-sort! (lambda (e1 e2)
+                               (< (string->number (car e1) 16)
+                                  (string->number (car e2) 16)))
+                             (hashassoc->alist hm2)))
+          (alst2a (take alst2 500))
+          (alst2b (drop alst2 500)))
+     (test-assert (lset= pair=? alst2a
+                         (list-ec (:range i 0 500)
+                                  `(,(number->string i 16)
+                                    . ,(+ 10000 i)))))
+     (test-assert (lset= pair=? alst2b
+                         (list-ec (:range i 500 1000)
+                                  `(,(number->string i 16)
+                                    . ,i))))
+     (test-assert (lset= pair=?
+                         (hashassoc->alist hm1)
+                         (list-ec (:range i 0 1000)
+                                  `(,(number->string i 16)
+                                    . ,i)))))
    ))
 
 (display successes)

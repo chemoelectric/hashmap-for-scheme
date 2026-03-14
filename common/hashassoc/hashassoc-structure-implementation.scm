@@ -595,6 +595,52 @@
 
 ;;;-------------------------------------------------------------------
 ;;;
+;;; Updates that produce a new trie that shares structure with the old
+;;; trie.
+;;;
+
+(define (hashassoc-replace hm key value)
+  (if (hashassoc-ref hm key)
+    (hashassoc-replace-aux hm key value)
+    hm))
+
+(define (hashassoc-replace-aux hm key value)
+  (let* ((trie (vector-copy (hashassoc-trie hm)))
+         (hm (construct-hashassoc (hashassoc-size hm)
+                                  (hashassoc-equiv? hm)
+                                  (key->depth->popmap hm)
+                                  trie))
+         (depth->popmap ((key->depth->popmap hm) key)))
+    (let loop ((array trie)
+               (depth 0)
+               (pm (depth->popmap 0)))
+      (let* ((mask (fx- pm 1))
+             (i (fxbit-count
+                 (fxand mask (get-population-map array))))
+             (entry (get-entry array i)))
+        (cond
+          ((pair? entry)
+           (let ((equiv? (hashassoc-equiv? hm))
+                 (k (car entry)))
+             (when (equiv? key k)
+               (set-entry! array i `(,key . ,value)))
+             hm))
+          ((chain? entry)
+           (let* ((equiv? (hashassoc-equiv? hm))
+                  (matches? (lambda (k) (equiv? key k))))
+             (set-entry!
+              array i (copy-chain-with-replacement entry matches?
+                                                   `(,key . ,value)))
+             hm))
+          (else
+           (let ((copied-entry (vector-copy entry))
+                 (next-depth (fx+ depth 1)))
+             (set-entry! array i copied-entry)
+             (loop copied-entry next-depth
+                   (depth->popmap next-depth))) ))))))
+
+;;;-------------------------------------------------------------------
+;;;
 ;;; Walking the trie.
 ;;;
 

@@ -32,6 +32,8 @@
           hashassoc-delete!
           hashassoc-delete-from-list!
 
+          hashassoc-replace
+
           hashassoc-union
           hashassoc-add!
           hashassoc-intersection

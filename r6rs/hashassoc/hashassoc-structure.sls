@@ -25,6 +25,8 @@
           hashassoc-delete!
           hashassoc-delete-from-list!
 
+          hashassoc-replace
+
           hashassoc->alist
           hashassoc->vector
           hashassoc->generator

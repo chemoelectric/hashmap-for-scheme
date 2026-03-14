@@ -174,6 +174,24 @@
              (values (car lst) -1)))
          (values chain 0))))))
 
+(define-syntax copy-chain-with-replacement
+  ;;
+  ;; Copy a chain and replace one of its pairs. Returns the new chain.
+  ;;
+  ;; (This implementation copies the whole list, rather than try to
+  ;; copy just what is necessary. Except in tests, the list should be
+  ;; short.)
+  ;;
+  (syntax-rules ()
+    ((¶ chain matches? new-pair)
+     (let* ((new-chain (vector-copy chain))
+            (lst (list-copy (vector-ref new-chain 1)))
+            (tl (find-tail (lambda (pair) (matches? (car pair)))
+                           lst)))
+       (when tl (set-car! tl new-pair))
+       (vector-set! new-chain 1 lst)
+       new-chain))))
+
 ;;;-------------------------------------------------------------------
 ;;; local variables:
 ;;; mode: scheme

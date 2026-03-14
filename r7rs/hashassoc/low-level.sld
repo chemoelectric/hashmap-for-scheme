@@ -25,6 +25,7 @@
           insert-in-chain!
           set-in-chain!
           delete-from-chain!
+          copy-chain-with-replacement
           )
 
   (import (scheme base)
