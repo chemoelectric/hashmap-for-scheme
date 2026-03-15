@@ -38,10 +38,10 @@
               result)
              ((less? (car lst1) (car lst2))
               (set-cdr! last lst1)
-              (loop (cdr lst1) lst2 (cdr last)))
+              (loop (cdr lst1) lst2 lst1))
              (else
               (set-cdr! last lst2)
-              (loop lst1 (cdr lst2) (cdr last))))))))))
+              (loop lst1 (cdr lst2) lst2)))))))))
 
 (define (list-sort! less? lst)
   (let ((n (length lst)))
