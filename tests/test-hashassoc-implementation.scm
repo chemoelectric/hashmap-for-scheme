@@ -422,8 +422,8 @@
        (set! hm3 (hashassoc-replace hm3 (number->string i 16) i)))
      (test-assert (lset= pair=?
                          (hashassoc->alist hm2)
-                         (hashassoc->alist hm3))))
-   ))
+                         (hashassoc->alist hm3)))
+     )))
 
 (do-ec
  ;;
@@ -466,6 +466,59 @@
      (test-assert (lset= pair=? alst2a (hashassoc->alist hm1)))
      (test-assert (lset= pair=? alst2b
                          (list-ec (:range i 2000 3000)
+                                  `(,(number->string i 16) . ,i))))
+     )))
+
+(do-ec
+ ;;
+ ;; Test hashassoc-set.
+ ;;
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((cmp (make-comparator string? string=? string<? my-hash))
+        (pair=? (lambda (a b)
+                  (and (string=? (car a) (car b))
+                       (= (cdr a) (cdr b)))))
+        (hm1 (hashassoc-ec cmp (:range i 0 1000)
+                           `(,(number->string i 16) . ,i)))
+        (hm2 hm1))
+   (do ((i 0 (+ i 1)))
+       ((= i 500))
+     (set! hm2 (hashassoc-set hm2 (number->string i 16) (+ 10000 i))))
+   (test-assert (not (lset= pair=?
+                            (hashassoc->alist hm1)
+                            (hashassoc->alist hm2))))
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm1)
+                       (list-ec (:range i 0 1000)
+                                `(,(number->string i 16) . ,i))))
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm2)
+                       (list-ec (:range i 0 1000)
+                                `(,(number->string i 16)
+                                  . ,(if (< i 500) (+ 10000 i) i)))))
+   ;;
+   ;;
+   ;;
+   (do ((i 2000 (+ i 1)))
+       ((= i 3000))
+     (set! hm2 (hashassoc-set hm2 (number->string i 16) i)))
+   (let* ((alst2 (list-sort! (lambda (e1 e2)
+                               (< (string->number (car e1) 16)
+                                  (string->number (car e2) 16)))
+                             (hashassoc->alist hm2)))
+          (alst2a (take alst2 1000))
+          (alst2b (drop alst2 1000)))
+     (test-assert (lset= pair=? alst2a
+                         (list-ec (:range i 0 1000)
+                                  `(,(number->string i 16)
+                                    . ,(if (< i 500) (+ 10000 i) i)))))
+     (test-assert (lset= pair=? alst2b
+                         (list-ec (:range i 2000 3000)
+                                  `(,(number->string i 16) . ,i))))
+     (test-assert (lset= pair=? (hashassoc->alist hm1)
+                         (list-ec (:range i 0 1000)
                                   `(,(number->string i 16) . ,i))))
      )))
 
