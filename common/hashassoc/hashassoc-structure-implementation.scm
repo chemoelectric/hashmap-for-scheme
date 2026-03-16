@@ -154,8 +154,8 @@
                        (matches? (lambda (k) (equiv? key k))))
                   (let ((elem (search-chain entry matches?)))
                     (if elem
-                    `(,(car elem) . ,(cdr elem))
-                    #f))))
+                      `(,(car elem) . ,(cdr elem))
+                      #f))))
                (else
                 (let ((next-depth (fx+ depth 1)))
                   (loop entry next-depth
@@ -345,9 +345,9 @@
              (define (increase-depth)
                (let* ((array1 (get-entry array i))
                       (depth1 (fx+ depth 1))
-                      (setter1 (lambda (elem)
-                                 (set-entry! array i elem))))
-                 (loop array1 depth1 setter1)))
+                      (setter1! (lambda (elem)
+                                  (set-entry! array i elem))))
+                 (loop array1 depth1 setter1!)))
 
              (cond
                ((not (fx=? popmap new-popmap))
@@ -604,6 +604,24 @@
     (hashassoc-replace-aux hm key value)
     hm))
 
+(define (hashassoc-insert hm key value)
+  (cond
+    ((hashassoc-empty? hm)
+     (hashassoc-insert! (hashassoc-copy hm) key value))
+    ((hashassoc-ref hm key)
+     hm)
+    (else
+     (hashassoc-insert-aux hm key value))))
+
+(define (hashassoc-set hm key value)
+  (cond
+    ((hashassoc-empty? hm)
+     (hashassoc-insert! (hashassoc-copy hm) key value))
+    ((hashassoc-ref hm key)
+     (hashassoc-replace-aux hm key value))
+    (else
+     (hashassoc-insert-aux hm key value))))
+
 (define (hashassoc-replace-aux hm key value)
   (let* ((trie (vector-copy (hashassoc-trie hm)))
          (hm (construct-hashassoc (hashassoc-size hm)
@@ -638,6 +656,115 @@
              (set-entry! array i copied-entry)
              (loop copied-entry next-depth
                    (depth->popmap next-depth))) ))))))
+
+(define (hashassoc-insert-aux hm key value)
+  (let ((hm (construct-hashassoc (fx+ 1 (hashassoc-size hm))
+                                 (hashassoc-equiv? hm)
+                                 (key->depth->popmap hm)
+                                 (hashassoc-trie hm)))
+        (depth->popmap ((key->depth->popmap hm) key)))
+    (let loop ((array (hashassoc-trie hm))
+               (depth 0)
+               (setter! (lambda (trie)
+                          (set-hashassoc-trie! hm trie))))
+
+      (define (insert-at-chain chain setter!)
+        (setter! (alist->chain (cons `(,key . ,value)
+                                     (chain->alist chain)))))
+
+      (let ((pm (depth->popmap depth)))
+        (cond
+          ((hash-bits-exhausted? pm)
+           ;; ‘array’ is actually a chain, not an array.
+           (insert-at-chain array setter!)
+           hm)
+          (else
+           (let* ((popmap (get-population-map array))
+                  (new-popmap (fxior pm popmap))
+                  (mask (fx- pm 1))
+                  (i (fxbit-count (fxand mask popmap))))
+
+             (define (expand-the-current-array array)
+               (let* ((n (array-size array))
+                      (array1 (make-vector (fx+ n 2))))
+                 (set-population-map! array1 new-popmap)
+                 (do ((j 0 (fx+ j 1)))
+                     ((fx=? j i))
+                   (set-entry! array1 j (get-entry array j)))
+                 (set-entry! array1 i `(,key . ,value))
+                 (if (not (fx=? i n))
+                   (do ((j i (fx+ j 1)))
+                       ((fx=? j n))
+                     (set-entry! array1 (fx+ j 1)
+                                 (get-entry array j))))
+                 (setter! array1)))
+
+             (define (insert-at-pair array)
+               (let* ((pair1 (get-entry array i))
+                      (key1 (car pair1)))
+                 (grow-trie-at-pair
+                  depth pair1 (lambda (elem)
+                                (set-entry! array i elem)))))
+
+             (define (grow-trie-at-pair deepness pair1 setter!)
+               (let* ((key1 (car pair1))
+                      (kdpm (key->depth->popmap hm))
+                      (deepness+1 (fx+ deepness 1))
+                      (pm% ((kdpm key) deepness+1))
+                      (pm1% (if (hash-bits-exhausted? pm%)
+                              pm%
+                              ((kdpm key1) deepness+1))))
+                 (cond
+                   ((hash-bits-exhausted? pm%)
+                    (let ((chain (create-chain `(,key . ,value)
+                                               pair1)))
+                      (setter! chain)))
+                   ((fx<? pm% pm1%)
+                    (let ((array1
+                           (make-array-node (fxior pm% pm1%)
+                                            `(,key . ,value) pair1)))
+                      (setter! array1)))
+                   ((fx<? pm1% pm%)
+                    (let ((array1
+                           (make-array-node (fxior pm% pm1%)
+                                            pair1 `(,key . ,value))))
+                      (setter! array1)))
+                   (else
+                    (let* ((array1 (make-vector 2))
+                           (setter1! (lambda (elem)
+                                       (set-entry! array1 0 elem))))
+                      (set-population-map! array1 pm%)
+                      (setter! array1)
+                      (grow-trie-at-pair deepness+1 pair1
+                                         setter1!))))))
+
+             (define (increase-depth array)
+               (let* ((array1 (get-entry array i))
+                      (depth1 (fx+ depth 1))
+                      (setter1! (lambda (elem)
+                                  (set-entry! array i elem))))
+                 (loop array1 depth1 setter1!)))
+
+             (cond
+               ((not (fx=? popmap new-popmap))
+                (expand-the-current-array array)
+                hm)
+               ((pair? (get-entry array i))
+                (let ((array (vector-copy array)))
+                  (setter! array)
+                  (insert-at-pair array)
+                  hm))
+               ((chain? (get-entry array i))
+                (let ((array (vector-copy array)))
+                  (setter! array)
+                  (insert-at-chain (get-entry array i)
+                                   (lambda (elem)
+                                     (set-entry! array i elem)))
+                  hm))
+               (else
+                (let ((array (vector-copy array)))
+                  (setter! array)
+                  (increase-depth array)))))))))))
 
 ;;;-------------------------------------------------------------------
 ;;;
@@ -791,7 +918,8 @@
     (construct-hashassoc sz (hashassoc-equiv? hm)
                          (key->depth->popmap hm)
                          (if (fxzero? sz)
-                           #f (copy-array (hashassoc-trie hm))))))
+                           #f
+                           (copy-array (hashassoc-trie hm))))))
 
 (define (copy-array array)
   (let* ((n (array-size array))

@@ -33,6 +33,8 @@
           hashassoc-delete!
           hashassoc-delete-from-list!
 
+          hashassoc-set
+          hashassoc-insert
           hashassoc-replace
 
           hashassoc-union

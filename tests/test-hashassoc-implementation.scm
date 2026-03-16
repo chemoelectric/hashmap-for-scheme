@@ -378,6 +378,9 @@
    ))
 
 (do-ec
+ ;;
+ ;; Test hashassoc-replace.
+ ;;
  (:list my-hash (list string-hash
                       (lambda (str)
                         (remainder (string-hash str) 2))))
@@ -410,7 +413,61 @@
                          (list-ec (:range i 0 1000)
                                   `(,(number->string i 16)
                                     . ,i)))))
+   (let ((hm3 hm2))
+     ;;
+     ;; Check that you cannot replace what is not already there.
+     ;;
+     (do ((i 1500 (+ i 1)))
+         ((= i 2000))
+       (set! hm3 (hashassoc-replace hm3 (number->string i 16) i)))
+     (test-assert (lset= pair=?
+                         (hashassoc->alist hm2)
+                         (hashassoc->alist hm3))))
    ))
+
+(do-ec
+ ;;
+ ;; Test hashassoc-insert.
+ ;;
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((cmp (make-comparator string? string=? string<? my-hash))
+        (pair=? (lambda (a b)
+                  (and (string=? (car a) (car b))
+                       (= (cdr a) (cdr b)))))
+        (hm1 (hashassoc-ec cmp (:range i 0 1000)
+                           `(,(number->string i 16) . ,i)))
+        (hm2 hm1))
+   (do ((i 0 (+ i 1)))
+       ((= i 500))
+     (set! hm2 (hashassoc-insert hm2 (number->string i 16) (+ 10000 i))))
+   ;;
+   ;; You cannot insert where there already is something.
+   ;;
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm1)
+                       (hashassoc->alist hm2)))
+   ;;
+   ;;
+   ;;
+   (do ((i 2000 (+ i 1)))
+       ((= i 3000))
+     (set! hm2 (hashassoc-insert hm2 (number->string i 16) i)))
+   (let* ((alst2 (list-sort! (lambda (e1 e2)
+                               (< (string->number (car e1) 16)
+                                  (string->number (car e2) 16)))
+                             (hashassoc->alist hm2)))
+          (alst2a (take alst2 1000))
+          (alst2b (drop alst2 1000)))
+     (test-assert (lset= pair=? alst2a
+                         (list-ec (:range i 0 1000)
+                                  `(,(number->string i 16) . ,i))))
+     (test-assert (lset= pair=? alst2a (hashassoc->alist hm1)))
+     (test-assert (lset= pair=? alst2b
+                         (list-ec (:range i 2000 3000)
+                                  `(,(number->string i 16) . ,i))))
+     )))
 
 (display successes)
 (display " successes\n")
