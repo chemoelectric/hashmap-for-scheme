@@ -522,6 +522,42 @@
                                   `(,(number->string i 16) . ,i))))
      )))
 
+(do-ec
+ ;;
+ ;; Test hashassoc-delete
+ ;;
+ (:list my-hash (list string-hash
+                      (lambda (str)
+                        (remainder (string-hash str) 2))))
+ (let* ((cmp (make-comparator string? string=? string<? my-hash))
+        (pair=? (lambda (a b)
+                  (and (string=? (car a) (car b))
+                       (= (cdr a) (cdr b)))))
+        (hm1 (hashassoc-ec cmp (:range i 0 1000)
+                           `(,(number->string i 16) . ,i)))
+        (hm2 hm1))
+   (do ((i 0 (+ i 1)))
+       ((= i 1000))
+     (set! hm2 (hashassoc-delete hm2 (number->string i 16)))
+     (test-equal (- 999 i) (hashassoc-size hm2))
+     (when (= i 499)
+       (let ((alst2 (list-sort! (lambda (e1 e2)
+                               (< (string->number (car e1) 16)
+                                  (string->number (car e2) 16)))
+                                (hashassoc->alist hm2))))
+         (test-assert (list= pair=? alst2
+                             (list-ec (:range i 500 1000)
+                                      `(,(number->string i 16) . ,i)))))))
+   (test-assert (not (lset= pair=?
+                            (hashassoc->alist hm1)
+                            (hashassoc->alist hm2))))
+   (test-assert (lset= pair=?
+                       (hashassoc->alist hm1)
+                       (list-ec (:range i 0 1000)
+                                `(,(number->string i 16) . ,i))))
+   (test-assert (lset= pair=? '() (hashassoc->alist hm2)))
+   ))
+
 (display successes)
 (display " successes\n")
 (display failures)

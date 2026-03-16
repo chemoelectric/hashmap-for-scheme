@@ -27,6 +27,7 @@
           hashassoc-set
           hashassoc-insert
           hashassoc-replace
+          hashassoc-delete
 
           hashassoc->alist
           hashassoc->vector

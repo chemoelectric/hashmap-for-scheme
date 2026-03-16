@@ -36,6 +36,7 @@
           hashassoc-set
           hashassoc-insert
           hashassoc-replace
+          hashassoc-delete
 
           hashassoc-union
           hashassoc-add!

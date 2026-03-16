@@ -391,16 +391,18 @@
      ;; Whether the key is found can be detected by looking for a
      ;; change in hashassoc size.
      ;;
-     (case (hashassoc-size hm)
-       ((0) hm)
-       ((1) (begin
-              (when (hashassoc-ref hm key)
-                (set-hashassoc-size! hm 0)
-                (set-hashassoc-trie! hm #f))
-              hm))
-       (else (begin
-               (delete-from-trie! hm key)
-               hm))))
+     (let ((n (hashassoc-size hm)))
+       (cond
+         ((fxzero? n)
+          hm)
+         ((fx=? n 1)
+          (when (hashassoc-ref hm key)
+            (set-hashassoc-size! hm 0)
+            (set-hashassoc-trie! hm #f))
+          hm)
+         (else
+          (delete-from-trie! hm key)
+          hm))))
     ((hm . rest*)
      ;;
      ;; Multiple keys can listed in the command.
@@ -502,7 +504,7 @@
           ;;
           (define (middle-levels-size-one!)
             ;; If the current entry is a key-value pair, eliminate
-            ;; this array. Continue at the next level. Othwerwise we
+            ;; this array. Continue at the next level. Otherwise we
             ;; are done.
             (let ((entry (get-entry array i)))
               (when (pair? entry)
@@ -638,11 +640,8 @@
              (entry (get-entry array i)))
         (cond
           ((pair? entry)
-           (let ((equiv? (hashassoc-equiv? hm))
-                 (k (car entry)))
-             (when (equiv? key k)
-               (set-entry! array i `(,key . ,value)))
-             hm))
+           (set-entry! array i `(,key . ,value))
+           hm)
           ((chain? entry)
            (let* ((equiv? (hashassoc-equiv? hm))
                   (matches? (lambda (k) (equiv? key k))))
@@ -765,6 +764,25 @@
                 (let ((array (vector-copy array)))
                   (setter! array)
                   (increase-depth array)))))))))))
+
+(define (hashassoc-delete hm key)
+  (let ((n (hashassoc-size hm))
+        (pair (hashassoc-ref hm key)))
+    (cond
+      ((not pair)
+       ;; The key is not in the hashmap.
+       hm)
+      ((fx=? n 1)
+       ;; The new hashmap is empty.
+       (construct-hashassoc 0 (hashassoc-equiv? hm)
+                            (key->depth->popmap hm)
+                            #f))
+      (else
+       ;; Make a new hashmap with the relevant path through its trie
+       ;; copied. Then use destructive deletion.
+       (let* ((arbitrary-value '<arbitrary-value>)
+              (hm (hashassoc-replace hm key arbitrary-value)))
+         (hashassoc-delete! hm key))))))
 
 ;;;-------------------------------------------------------------------
 ;;;
