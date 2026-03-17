@@ -38,6 +38,15 @@ TSTPROG2_R6RS = tests/test-hashassoc.sps
 TSTPROG1_R7RS = tests/test-hashassoc-low-level.scm
 TSTPROG2_R7RS = tests/test-hashassoc.scm
 
+awk-r6rs = awk \
+      '/^[[:space:]]*\(include "[^"]*"\)/ { \
+         split ($$0, ff, "\""); f = ff[2]; \
+         while ((getline s < f) > 0) { print s }; \
+         close (f); \
+         next } \
+       { sub (/\(hashassoc hashassoc-include\)/, "\#|(hashassoc hashassoc-include)|\#"); \
+         print }'
+
 # To test with Chez Scheme, one must install SRFI software, such as
 # chez-srfi.
 .PHONY: check-chez-r6rs
@@ -48,39 +57,33 @@ check-chez-r6rs:
 	$(call v,CHEZ)echo '(compile-file "$(<)")' | CHEZSCHEMELIBDIRS=$(PWD)/r6rs$${CHEZSCHEMELIBDIRS+:}$${CHEZSCHEMELIBDIRS} $(CHEZ) -q
 
 chezscheme/%.sls: r6rs/%.sls
-	$(call v,COPY)mkdir -p $(@D) && \
+	$(call v,AWK)mkdir -p $(@D) && \
 	rm -f $(@) && \
-	cp $(<) $(@)
+	$(awk-r6rs) < $(<) > $(@)
 
-chezscheme/%.scm: %.scm
-	$(call v,COPY)mkdir -p $(@D) && \
-	rm -f $(@) && \
-	cp $(<) $(@)
+chezscheme/hashassoc/hashassoc-structure.sls: \
+		common/hashassoc/hashassoc-structure-implementation.scm
+chezscheme/hashassoc/low-level.sls: \
+		common/hashassoc/low-level-implementation.scm
+chezscheme/hashassoc/eager-comprehensions.sls: \
+		common/hashassoc/eager-comprehensions-implementation.scm \
+		common/hashassoc/ec.scm
 
 # Precompiled Chez Scheme.
 chezscheme/hashassoc.so: \
 		chezscheme/hashassoc.sls \
 		chezscheme/hashassoc/hashassoc-structure.so
-chezscheme/hashassoc/hashassoc-include.so: \
-		chezscheme/hashassoc/hashassoc-include.sls
 chezscheme/hashassoc/hashassoc-structure.so: \
 		chezscheme/hashassoc/hashassoc-structure.sls \
-		chezscheme/hashassoc/hashassoc-include.so \
 		chezscheme/hashassoc/low-level.so \
-		chezscheme/hashassoc/define-record-factory.so \
-		chezscheme/common/hashassoc/hashassoc-structure-implementation.scm
+		chezscheme/hashassoc/define-record-factory.so
 chezscheme/hashassoc/low-level.so: \
-		chezscheme/hashassoc/low-level.sls \
-		chezscheme/hashassoc/hashassoc-include.so \
-		chezscheme/common/hashassoc/low-level-implementation.scm
+		chezscheme/hashassoc/low-level.sls
 chezscheme/hashassoc/define-record-factory.so: \
 		chezscheme/hashassoc/define-record-factory.sls
 chezscheme/hashassoc/eager-comprehensions.so: \
-		chezscheme/hashassoc/eager-comprehensions.sls \
-		chezscheme/common/hashassoc/eager-comprehensions-implementation.scm \
-		chezscheme/common/hashassoc/ec.scm \
-		chezscheme/hashassoc.so \
-		chezscheme/hashassoc/hashassoc-include.so
+		chezscheme/hashassoc/eager-comprehensions.sls
+
 
 .PHONY: install-chez uninstall-chez
 install-chez:	chezscheme/hashassoc.sls chezscheme/hashassoc.so \
@@ -88,16 +91,10 @@ install-chez:	chezscheme/hashassoc.sls chezscheme/hashassoc.so \
 		chezscheme/hashassoc/eager-comprehensions.so \
 		chezscheme/hashassoc/define-record-factory.sls \
 		chezscheme/hashassoc/define-record-factory.so \
-		chezscheme/hashassoc/hashassoc-include.sls \
-		chezscheme/hashassoc/hashassoc-include.so \
 		chezscheme/hashassoc/hashassoc-structure.sls \
 		chezscheme/hashassoc/hashassoc-structure.so \
 		chezscheme/hashassoc/low-level.sls \
-		chezscheme/hashassoc/low-level.so \
-		chezscheme/common/hashassoc/low-level-implementation.scm \
-		chezscheme/common/hashassoc/hashassoc-structure-implementation.scm \
-		chezscheme/common/hashassoc/eager-comprehensions-implementation.scm \
-		chezscheme/common/hashassoc/ec.scm
+		chezscheme/hashassoc/low-level.so
 	for f in $(^:chezscheme/%=%); do \
 	  mkdir -p $(CHEZSCHEME_INSTALLDIR)/`dirname "$${f}"` && \
 	  rm -f $(CHEZSCHEME_INSTALLDIR)/"$${f}" && \
@@ -110,16 +107,11 @@ uninstall-chez:
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/eager-comprehensions.so \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/define-record-factory.sls \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/define-record-factory.so \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-include.sls \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-include.so \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-structure.sls \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-structure.so \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.sls \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.so \
-		$(CHEZSCHEME_INSTALLDIR)/common/hashassoc/low-level-implementation.scm \
-		$(CHEZSCHEME_INSTALLDIR)/common/hashassoc/hashassoc-structure-implementation.scm \
-		$(CHEZSCHEME_INSTALLDIR)/common/hashassoc/eager-comprehensions-implementation.scm \
-		$(CHEZSCHEME_INSTALLDIR)/common/hashassoc/ec.scm
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.so
+	rmdir	$(CHEZSCHEME_INSTALLDIR)/hashassoc || true
 
 clean::
 	-rm -Rf chezscheme
