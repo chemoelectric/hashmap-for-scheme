@@ -6,6 +6,8 @@
 
 VERSION = 0.0.0
 
+CHEZSCHEME_INSTALLDIR = ~/.local/lib/chezscheme
+
 include silent-rules.mk
 DEFAULT_VERBOSITY = 0
 
@@ -41,6 +43,68 @@ TSTPROG2_R7RS = tests/test-hashassoc.scm
 .PHONY: check-chez-r6rs
 check-chez-r6rs:
 	$(call check-chez-r6rs, $(TSTPROG1_R6RS) $(TSTPROG2_R6RS))
+
+%.so: %.sls
+	$(call v,CHEZ)echo '(compile-file "$(<)")' | CHEZSCHEMELIBDIRS=$(PWD)/r6rs$${CHEZSCHEMELIBDIRS+:}$${CHEZSCHEMELIBDIRS} $(CHEZ) -q
+
+chezscheme/%.sls: r6rs/%.sls
+	$(call v,COPY)mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+chezscheme/%.scm: %.scm
+	$(call v,COPY)mkdir -p $(@D) && \
+	rm -f $(@) && \
+	cp $(<) $(@)
+
+# Precompiled Chez Scheme.
+chezscheme/hashassoc.so: \
+		chezscheme/hashassoc.sls \
+		chezscheme/hashassoc/hashassoc-structure.so
+chezscheme/hashassoc/hashassoc-include.so: \
+		chezscheme/hashassoc/hashassoc-include.sls
+chezscheme/hashassoc/hashassoc-structure.so: \
+		chezscheme/hashassoc/hashassoc-structure.sls \
+		chezscheme/hashassoc/hashassoc-include.so \
+		chezscheme/hashassoc/low-level.so \
+		chezscheme/hashassoc/define-record-factory.so \
+		chezscheme/common/hashassoc/hashassoc-structure-implementation.scm
+chezscheme/hashassoc/low-level.so: \
+		chezscheme/hashassoc/low-level.sls \
+		chezscheme/hashassoc/hashassoc-include.so \
+		chezscheme/common/hashassoc/low-level-implementation.scm
+chezscheme/hashassoc/define-record-factory.so: \
+		chezscheme/hashassoc/define-record-factory.sls
+
+.PHONY: install-chez uninstall-chez
+install-chez:	chezscheme/hashassoc.sls chezscheme/hashassoc.so \
+		chezscheme/hashassoc/define-record-factory.sls \
+		chezscheme/hashassoc/define-record-factory.so \
+		chezscheme/hashassoc/hashassoc-include.sls \
+		chezscheme/hashassoc/hashassoc-include.so \
+		chezscheme/hashassoc/hashassoc-structure.sls \
+		chezscheme/hashassoc/hashassoc-structure.so \
+		chezscheme/hashassoc/low-level.sls \
+		chezscheme/hashassoc/low-level.so
+	for f in $(^:chezscheme/%=%); do \
+	  mkdir -p $(CHEZSCHEME_INSTALLDIR)/`dirname "$${f}"` && \
+	  rm -f $(CHEZSCHEME_INSTALLDIR)/"$${f}" && \
+	  cp chezscheme/"$${f}" $(CHEZSCHEME_INSTALLDIR)/"$${f}"; \
+	done
+uninstall-chez:
+	rm -f	$(CHEZSCHEME_INSTALLDIR)/hashassoc.sls \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/define-record-factory.sls \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/define-record-factory.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-include.sls \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-include.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-structure.sls \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-structure.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.sls \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.so
+
+clean::
+	-rm -Rf chezscheme
 
 # You may have to install some software with snow-chibi or by other
 # means. (Also, last I tried it, Chibi’s SRFI-1 was incomplete and
