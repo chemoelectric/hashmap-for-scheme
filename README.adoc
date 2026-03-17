@@ -5,8 +5,9 @@ be used _in-place_. However, all operations that modify the map
 in-place return the map as value, so code can be written as if the map
 were ‘linear updating’. The maps may also be used as _persistent_ data
 structures.footnote:[Such structures are often called ‘immutable’, but
-I think ‘persistent’ is a better name. The structure may change, but
-its past states _effectively persist_, until no longer needed.]
+I think ‘persistent’ is a better name. The structure may change
+internally, but its past states _effectively persist_ until no longer
+needed.]
 
 There are interfaces for R⁶RS, R⁷RS, Gambit Scheme (as an R⁷RS
 library), CHICKEN 5 Scheme (using the ‘r7rs’ egg), and CHICKEN 6
