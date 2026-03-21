@@ -62,7 +62,10 @@ outputs of their hash functions will be truncated to fixnums.
 *(hashassoc*+->+*generator _hashmap_)*:: Return a thunk that
      generates, in any order, the key-value pairs that are contained
      in the hashmap. Once all the key-value pairs have been produced,
-     end-of-file objects are generated, instead.
+     end-of-file objects are generated, instead.footnote:[The current
+     implementation of the generator is in continuation-passing style,
+     and employs no call/cc. The generator is used in the SRFI-42
+     interface.]
 *(hashassoc-fold _kons_ _knil_ _hashmap_)*:: Walk the hashmap in any
      order. Return the result of _(kons pairₙ (...(kons pair₁ (kons
      pair₀ knil))...))_
