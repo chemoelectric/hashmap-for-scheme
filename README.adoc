@@ -21,7 +21,10 @@ corresponding targets _uninstall-chicken-5-egg_ and
 _uninstall-chicken-6-egg_. The egg is called *hashassoc*. There are
 also targets _install-chez_ and _uninstall-chez_ for Chez Scheme, with
 both source and pre-compiled code going in the directory specified by
-the makefile variable _CHEZSCHEME_INSTALLDIR_.
+the makefile variable _CHEZSCHEME_INSTALLDIR_. And there are targets
+_install-gauche_ and _uninstall-gauche_ for Gauche Scheme, with source
+code going into the directory specified by the makefile variable
+_GAUCHE_INSTALLDIR_.
 
 Import the library as *(hashassoc)*. The following procedures are
 provided.footnote:[To avoid confusion with SRFI-146, the procedure

@@ -7,6 +7,7 @@
 VERSION = 0.0.0
 
 CHEZSCHEME_INSTALLDIR = ~/.local/lib/chezscheme
+GAUCHE_INSTALLDIR = $(shell gauche-config --sitelibdir)
 
 include silent-rules.mk
 DEFAULT_VERBOSITY = 0
@@ -156,6 +157,38 @@ check-gambit-gsi-r7rs:
 .PHONY: check-gauche-r7rs
 check-gauche-r7rs:
 	$(call check-gauche-r7rs, $(TSTPROG1_R7RS) $(TSTPROG2_R7RS))
+
+.PHONY: install-gauche uninstall-gauche
+install-gauche: r7rs/hashassoc.sld \
+		r7rs/hashassoc/define-record-factory.sld \
+		r7rs/hashassoc/eager-comprehensions.sld \
+		r7rs/hashassoc/hashassoc-structure.sld \
+		r7rs/hashassoc/low-level.sld \
+		common/hashassoc/eager-comprehensions-implementation.scm \
+		common/hashassoc/ec.scm \
+		common/hashassoc/hashassoc-structure-implementation.scm \
+		common/hashassoc/low-level-implementation.scm
+	$(call v,COPY)mkdir -p $(GAUCHE_INSTALLDIR)/{hashassoc,common/hashassoc} && \
+	cp r7rs/hashassoc.sld $(GAUCHE_INSTALLDIR) && \
+	cp r7rs/hashassoc/define-record-factory.sld \
+	   r7rs/hashassoc/eager-comprehensions.sld \
+	   r7rs/hashassoc/hashassoc-structure.sld \
+	   r7rs/hashassoc/low-level.sld $(GAUCHE_INSTALLDIR)/hashassoc && \
+	cp common/hashassoc/eager-comprehensions-implementation.scm \
+	   common/hashassoc/ec.scm \
+	   common/hashassoc/hashassoc-structure-implementation.scm \
+	   common/hashassoc/low-level-implementation.scm \
+	   $(GAUCHE_INSTALLDIR)/common/hashassoc
+uninstall-gauche:
+	-rm -f	$(GAUCHE_INSTALLDIR)/hashassoc.sld \
+		$(GAUCHE_INSTALLDIR)/hashassoc/define-record-factory.sld \
+		$(GAUCHE_INSTALLDIR)/hashassoc/eager-comprehensions.sld \
+		$(GAUCHE_INSTALLDIR)/hashassoc/hashassoc-structure.sld \
+		$(GAUCHE_INSTALLDIR)/hashassoc/low-level.sld \
+		$(GAUCHE_INSTALLDIR)/common/hashassoc/eager-comprehensions-implementation.scm \
+		$(GAUCHE_INSTALLDIR)/common/hashassoc/ec.scm \
+		$(GAUCHE_INSTALLDIR)/common/hashassoc/hashassoc-structure-implementation.scm \
+		$(GAUCHE_INSTALLDIR)/common/hashassoc/low-level-implementation.scm
 
 # To test with Loko Scheme one must install SRFI software, such as
 # chez-srfi. The R⁶RS libraries can be imported into R⁷RS software.
