@@ -54,7 +54,8 @@ check-chez-r6rs:
 	$(call check-chez-r6rs, $(TSTPROG1_R6RS) $(TSTPROG2_R6RS))
 
 %.so: %.sls
-	$(call v,CHEZ)echo '(compile-file "$(<)")' | CHEZSCHEMELIBDIRS=$(PWD)/r6rs$${CHEZSCHEMELIBDIRS+:}$${CHEZSCHEMELIBDIRS} $(CHEZ) -q
+	$(call v,CHEZ)echo '(generate-wpo-files #t)(compile-file "$(<)")' \
+	  | CHEZSCHEMELIBDIRS=$(PWD)/r6rs$${CHEZSCHEMELIBDIRS+:}$${CHEZSCHEMELIBDIRS} $(CHEZ) -q
 
 chezscheme/%.sls: r6rs/%.sls
 	$(call v,AWK)mkdir -p $(@D) && \
@@ -95,22 +96,23 @@ install-chez:	chezscheme/hashassoc.sls chezscheme/hashassoc.so \
 		chezscheme/hashassoc/hashassoc-structure.so \
 		chezscheme/hashassoc/low-level.sls \
 		chezscheme/hashassoc/low-level.so
-	for f in $(^:chezscheme/%=%); do \
+	for f in $(^:chezscheme/%=%) \
+	    $(patsubst %.so,%.wpo,$(filter %.so,$(^:chezscheme/%=%))); do \
 	  mkdir -p $(CHEZSCHEME_INSTALLDIR)/`dirname "$${f}"` && \
 	  rm -f $(CHEZSCHEME_INSTALLDIR)/"$${f}" && \
 	  cp chezscheme/"$${f}" $(CHEZSCHEME_INSTALLDIR)/"$${f}"; \
 	done
 uninstall-chez:
 	rm -f	$(CHEZSCHEME_INSTALLDIR)/hashassoc.sls \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc.{so,wpo} \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/eager-comprehensions.sls \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc/eager-comprehensions.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/eager-comprehensions.{so,wpo} \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/define-record-factory.sls \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc/define-record-factory.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/define-record-factory.{so,wpo} \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-structure.sls \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-structure.so \
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/hashassoc-structure.{so,wpo} \
 		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.sls \
-		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.so
+		$(CHEZSCHEME_INSTALLDIR)/hashassoc/low-level.{so,wpo}
 	rmdir	$(CHEZSCHEME_INSTALLDIR)/hashassoc || true
 
 clean::
