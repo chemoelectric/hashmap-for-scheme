@@ -8,6 +8,10 @@
           :hashassoc-keys
           :hashassoc-values)
 
+  ;; Support for SRFI-158 generators.
+  (export :generator)
+
+  ;; Symbols documented in SRFI-42.
   (export do-ec
           list-ec
           append-ec
@@ -30,8 +34,9 @@
           ;; made to work with a Scheme’s module system, and making
           ;; dispatched generators work with a module system
           ;; introduces breakage. Dispatched generators are
-          ;; unnecessary, anyway, they are a lot of code to maintain,
-          ;; and they impact performance and documentation.
+          ;; unnecessary, anyway. They are a lot of code to maintain,
+          ;; they impact performance and documentation, and we can use
+          ;; SRFI-158 generators instead.
           :list
           :string
           :vector

@@ -9,6 +9,10 @@
           :hashassoc-keys
           :hashassoc-values
 
+          ;; Support for SRFI-158 generators.
+          :generator
+
+          ;; Symbols documented in SRFI-42.
           do-ec
           list-ec
           append-ec
