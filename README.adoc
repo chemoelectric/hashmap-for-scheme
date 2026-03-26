@@ -195,7 +195,18 @@ The SRFI-42 interface is extended with the following syntax:
 *(:hashassoc-values _var1_ (index _var2_) _hashmap1_ ...)*::
      _Generators_. If more than one hashmap is listed, the hashmaps
      are gone through in sequence. They need not all have the same key
-     and value types.
+     and value types.footnote:indexproblem[Currently the *index*
+     variants may not work in Chez Scheme or other R⁶RS Schemes. Try
+     *:parallel (:integers _var2_)* instead. Indeed, I would recommend
+     never using *index*, as I might remove it from some variant of
+     SRFI-42 I write in the future.]
+
+*(:generator _var_ _generator1_ ...)*::
+*(:generator _var1_ (index _var2_) _generator1_ ...)*:: _Support for
+     SRFI-158 generators_. If more than one generator is listed, the
+     generators are gone through in
+     sequence.footnote:indexproblem[]footnote:[With SRFI-158 support,
+     there is no need anymore for SRFI-42 dispatched generators.]
 
 In Gambit Scheme, you cannot import *(hashassoc
 eager-comprehensions)*. Also, SRFI-128 is available from Snow under
