@@ -198,15 +198,16 @@ The SRFI-42 interface is extended with the following syntax:
      and value types.footnote:indexproblem[Currently the *index*
      variants may not work in Chez Scheme or other R⁶RS Schemes. Try
      *:parallel (:integers _var2_)* instead. Indeed, I would recommend
-     never using *index*, as I might remove it from some variant of
-     SRFI-42 I write in the future.]
+     never using *index*, as I might remove it from a future reduced
+     variant of SRFI-42. I already do not export symbols for
+     dispatched generators.]
 
 *(:generator _var_ _generator1_ ...)*::
 *(:generator _var1_ (index _var2_) _generator1_ ...)*:: _Support for
      SRFI-158 generators_. If more than one generator is listed, the
      generators are gone through in
      sequence.footnote:indexproblem[]footnote:[With SRFI-158 support,
-     there is no need anymore for SRFI-42 dispatched generators.]
+     there is no need for dispatched generators.]
 
 In Gambit Scheme, you cannot import *(hashassoc
 eager-comprehensions)*. Also, SRFI-128 is available from Snow under
